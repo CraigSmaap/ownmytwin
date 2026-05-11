@@ -1,0 +1,27 @@
+<svg viewBox="0 0 200 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: two overlapping person shapes = you + your twin -->
+  <!-- Real you (solid) -->
+  <circle cx="11" cy="10" r="5.5" fill="url(#grad)"/>
+  <path d="M1 36c0-8 20-8 20 0" fill="url(#grad)"/>
+
+  <!-- Your twin (outlined, offset) -->
+  <circle cx="21" cy="10" r="5.5" fill="white" stroke="url(#grad)" stroke-width="2"/>
+  <path d="M11 36c0-8 20-8 20 0" fill="none" stroke="url(#grad)" stroke-width="2"/>
+
+  <!-- Wordmark -->
+  <text x="50" y="27"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-size="19"
+    font-weight="800"
+    letter-spacing="-0.5"
+    fill="#0f172a">
+    <tspan fill="url(#grad)">Own</tspan>My<tspan fill="url(#grad)">Twin</tspan>
+  </text>
+</svg>
