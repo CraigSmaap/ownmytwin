@@ -12,18 +12,19 @@ interface License {
 }
 
 interface Listing {
-  id:            string;
-  name:          string;
-  profession:    string | null;
-  location:      string | null;
-  tone:          string[];
-  values:        string[];
-  photoUrl:      string | null;
-  licenses:      License[];
-  startingPrice: number | null;
-  slug:          string | null;
-  avgRating:     number | null;
-  reviewCount:   number;
+  id:                 string;
+  name:               string;
+  profession:         string | null;
+  location:           string | null;
+  tone:               string[];
+  values:             string[];
+  photoUrl:           string | null;
+  licenses:           License[];
+  startingPrice:      number | null;
+  slug:               string | null;
+  avgRating:          number | null;
+  reviewCount:        number;
+  verificationStatus: string;
 }
 
 function StarDisplay({ rating, count }: { rating: number; count: number }) {
@@ -80,6 +81,7 @@ const PRICE_OPTIONS = [
 function TwinCard({ listing }: { listing: Listing }) {
   const visibleLicenses = listing.licenses.slice(0, 3);
   const extraCount      = listing.licenses.length - 3;
+  const isVerified      = listing.verificationStatus === "verified";
 
   const initials = listing.name
     .split(" ")
@@ -110,7 +112,17 @@ function TwinCard({ listing }: { listing: Listing }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-white text-base leading-tight truncate">{listing.name}</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-bold text-white text-base leading-tight truncate">{listing.name}</h3>
+            {isVerified && (
+              <span className="inline-flex items-center gap-0.5 text-xs font-semibold bg-green-900/40 text-green-400 border border-green-800/50 px-1.5 py-0.5 rounded-full shrink-0">
+                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 1a5 5 0 100 10A5 5 0 006 1zm2.78 3.97a.75.75 0 00-1.06-1.06L5.25 6.44 4.28 5.47a.75.75 0 00-1.06 1.06l1.5 1.5a.75.75 0 001.06 0l3-3z" clipRule="evenodd" />
+                </svg>
+                Verified
+              </span>
+            )}
+          </div>
           {listing.profession && (
             <p className="text-sm text-indigo-400 mt-0.5 truncate">{listing.profession}</p>
           )}
@@ -189,19 +201,21 @@ function TwinCard({ listing }: { listing: Listing }) {
 }
 
 export default function MarketplacePage() {
-  const [listings,  setListings]  = useState<Listing[]>([]);
-  const [loading,   setLoading]   = useState(true);
-  const [usage,     setUsage]     = useState("");
-  const [location,  setLocation]  = useState("");
-  const [maxPrice,  setMaxPrice]  = useState("");
-  const [search,    setSearch]    = useState("");
+  const [listings,      setListings]      = useState<Listing[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [usage,         setUsage]         = useState("");
+  const [location,      setLocation]      = useState("");
+  const [maxPrice,      setMaxPrice]      = useState("");
+  const [search,        setSearch]        = useState("");
+  const [verifiedOnly,  setVerifiedOnly]  = useState(false);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (usage)    params.set("usage",    usage);
-    if (location) params.set("location", location);
-    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (usage)        params.set("usage",    usage);
+    if (location)     params.set("location", location);
+    if (maxPrice)     params.set("maxPrice", maxPrice);
+    if (verifiedOnly) params.set("verified", "1");
 
     const res  = await fetch(`/api/marketplace?${params}`);
     const data = await res.json();
@@ -220,13 +234,14 @@ export default function MarketplacePage() {
       )
     : listings;
 
-  const hasFilters = !!usage || !!location || !!maxPrice || !!search;
+  const hasFilters = !!usage || !!location || !!maxPrice || !!search || verifiedOnly;
 
   function clearFilters() {
     setUsage("");
     setLocation("");
     setMaxPrice("");
     setSearch("");
+    setVerifiedOnly(false);
   }
 
   return (
@@ -286,19 +301,35 @@ export default function MarketplacePage() {
           </select>
         </div>
 
-        {hasFilters && (
-          <div className="flex items-center justify-between pt-1">
-            <p className="text-xs text-slate-500">
-              {displayed.length} {displayed.length === 1 ? "twin" : "twins"} found
-            </p>
-            <button
-              onClick={clearFilters}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              Clear all filters ✕
-            </button>
-          </div>
-        )}
+        <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
+          <button
+            onClick={() => setVerifiedOnly((v) => !v)}
+            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+              verifiedOnly
+                ? "bg-green-900/40 text-green-400 border-green-800/50"
+                : "bg-slate-800 text-slate-500 border-slate-700 hover:text-slate-300"
+            }`}
+          >
+            <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+              <path fillRule="evenodd" d="M6 1a5 5 0 100 10A5 5 0 006 1zm2.78 3.97a.75.75 0 00-1.06-1.06L5.25 6.44 4.28 5.47a.75.75 0 00-1.06 1.06l1.5 1.5a.75.75 0 001.06 0l3-3z" clipRule="evenodd" />
+            </svg>
+            Verified only
+          </button>
+
+          {hasFilters && (
+            <div className="flex items-center gap-4 ml-auto">
+              <p className="text-xs text-slate-500">
+                {displayed.length} {displayed.length === 1 ? "twin" : "twins"} found
+              </p>
+              <button
+                onClick={clearFilters}
+                className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                Clear all ✕
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Loading skeleton */}

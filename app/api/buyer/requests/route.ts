@@ -21,11 +21,13 @@ export async function GET() {
       paidAt:       true,
       twin: {
         select: {
+          id:   true,
           name: true,
           user: { select: { publicSlug: true } },
         },
       },
-      review: { select: { id: true, rating: true, comment: true } },
+      review:        { select: { id: true, rating: true, comment: true } },
+      showcasePost:  { select: { id: true } },
     },
   });
 
@@ -34,7 +36,8 @@ export async function GET() {
     createdAt:   r.createdAt.toISOString(),
     respondedAt: r.respondedAt?.toISOString() ?? null,
     paidAt:      r.paidAt?.toISOString() ?? null,
-    twin:        r.twin ? { name: r.twin.name, slug: r.twin.user.publicSlug } : null,
+    twin:         r.twin ? { id: r.twin.id, name: r.twin.name, slug: r.twin.user.publicSlug } : null,
+    showcasePost: r.showcasePost ?? null,
   }));
 
   return NextResponse.json({ requests: serialized });

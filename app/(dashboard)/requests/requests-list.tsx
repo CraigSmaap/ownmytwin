@@ -22,6 +22,7 @@ const LICENSE_LABELS: Record<string, { label: string; icon: string }> = {
 };
 
 type Status = "pending" | "approved" | "rejected";
+type Filter = "all" | Status;
 
 interface LicenseRequest {
   id:           string;
@@ -38,17 +39,77 @@ interface LicenseRequest {
   paidAt:       string | null;
 }
 
-type Filter = "all" | Status;
-
 interface Props {
   initialRequests: LicenseRequest[];
   publicSlug:      string | null;
 }
 
 export function RequestsList({ initialRequests, publicSlug }: Props) {
-  const [requests] = useState<LicenseRequest[]>(initialRequests);
-  const [filter,    setFilter]    = useState<Filter>("all");
-  const [expanded,  setExpanded]  = useState<string | null>(null);
+  const [requests, setRequests] = useState<LicenseRequest[]>(initialRequests);
+  const [filter,   setFilter]   = useState<Filter>("all");
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Per-card action state
+  const [actionCard,  setActionCard]  = useState<string | null>(null);
+  const [actionType,  setActionType]  = useState<"approve" | "reject" | null>(null);
+  const [note,        setNote]        = useState("");
+  const [price,       setPrice]       = useState("");
+  const [submitting,  setSubmitting]  = useState(false);
+  const [actionError, setActionError] = useState("");
+
+  function openAction(id: string, type: "approve" | "reject") {
+    setActionCard(id);
+    setActionType(type);
+    setNote("");
+    setPrice("");
+    setActionError("");
+  }
+
+  function cancelAction() {
+    setActionCard(null);
+    setActionType(null);
+    setNote("");
+    setPrice("");
+    setActionError("");
+  }
+
+  async function submitAction() {
+    if (!actionCard || !actionType || submitting) return;
+    setSubmitting(true);
+    setActionError("");
+
+    const status      = actionType === "approve" ? "approved" : "rejected";
+    const agreedPrice = actionType === "approve" && price ? parseInt(price, 10) : undefined;
+
+    const res = await fetch(`/api/requests/${actionCard}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ status, responseNote: note || undefined, agreedPrice }),
+    });
+
+    setSubmitting(false);
+
+    if (!res.ok) {
+      setActionError("Something went wrong — try again.");
+      return;
+    }
+
+    const { request: updated } = await res.json();
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === actionCard
+          ? {
+              ...r,
+              status:       updated.status,
+              respondedAt:  updated.respondedAt,
+              responseNote: updated.responseNote,
+              agreedPrice:  updated.agreedPrice,
+            }
+          : r,
+      ),
+    );
+    cancelAction();
+  }
 
   const counts = {
     all:      requests.length,
@@ -90,9 +151,7 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
         <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-2xl">
           <p className="text-4xl mb-3">📬</p>
           <p className="text-slate-500 font-medium">
-            {filter === "all"
-              ? "No requests yet"
-              : `No ${filter} requests`}
+            {filter === "all" ? "No requests yet" : `No ${filter} requests`}
           </p>
           {filter === "all" && publicSlug && (
             <div className="mt-4 space-y-3">
@@ -121,13 +180,14 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
           {displayed.map((req) => {
             const meta       = LICENSE_LABELS[req.usageType];
             const isExpanded = expanded === req.id;
+            const isActing   = actionCard === req.id;
 
             return (
               <div
                 key={req.id}
                 className={`bg-slate-900 border rounded-2xl overflow-hidden transition-colors ${
                   req.status === "pending"
-                    ? "border-slate-700 hover:border-slate-600"
+                    ? "border-amber-900/50 hover:border-amber-800/60"
                     : req.status === "approved"
                     ? "border-green-900/50"
                     : "border-slate-800"
@@ -135,7 +195,6 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
               >
                 {/* Card header */}
                 <div className="p-5 flex items-start gap-4">
-                  {/* Avatar initial */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                     req.status === "approved"
                       ? "bg-green-900/40 text-green-400"
@@ -146,7 +205,6 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
                     {req.buyerName.charAt(0).toUpperCase()}
                   </div>
 
-                  {/* Main info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div>
@@ -156,7 +214,6 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
                         )}
                         <p className="text-xs text-slate-500 mt-0.5">{req.buyerEmail}</p>
                       </div>
-
                       <StatusBadge status={req.status as Status} />
                     </div>
 
@@ -189,18 +246,96 @@ export function RequestsList({ initialRequests, publicSlug }: Props) {
                   </div>
                 </div>
 
-                {/* Pending — admin review notice */}
+                {/* Pending — approve / reject actions */}
                 {req.status === "pending" && (
-                  <div className="px-5 pb-5 pt-4 border-t border-slate-800">
-                    <p className="text-xs text-slate-500 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block" />
-                      The OwnMyTwin team is reviewing this request and will be in touch.
-                    </p>
+                  <div className="px-5 pb-5 pt-4 border-t border-slate-800 space-y-3">
+                    {!isActing ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openAction(req.id, "approve")}
+                          className="flex-1 sm:flex-none bg-green-600 hover:bg-green-500 text-white text-xs font-semibold px-5 py-2 rounded-xl transition-colors"
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          onClick={() => openAction(req.id, "reject")}
+                          className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold px-5 py-2 rounded-xl transition-colors"
+                        >
+                          ✕ Decline
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-xs font-semibold text-white">
+                          {actionType === "approve" ? "✓ Approving request" : "✕ Declining request"}
+                        </p>
+
+                        {actionType === "approve" && (
+                          <div>
+                            <label className="text-xs text-slate-500 mb-1 block">
+                              Agreed price (R) <span className="text-slate-600">— optional</span>
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={price}
+                              onChange={(e) => setPrice(e.target.value)}
+                              placeholder="e.g. 5000"
+                              className="w-full sm:w-40 bg-slate-800 border border-slate-700 focus:border-indigo-500 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none"
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="text-xs text-slate-500 mb-1 block">
+                            Note to buyer <span className="text-slate-600">— optional</span>
+                          </label>
+                          <textarea
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            rows={2}
+                            placeholder={
+                              actionType === "approve"
+                                ? "e.g. Happy to work together — please complete payment to proceed."
+                                : "e.g. Not available for this type of usage at the moment."
+                            }
+                            className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none resize-none"
+                          />
+                        </div>
+
+                        {actionError && <p className="text-xs text-red-400">{actionError}</p>}
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={cancelAction}
+                            className="px-4 py-2 text-xs text-slate-500 hover:text-slate-300 border border-slate-700 rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={submitAction}
+                            disabled={submitting}
+                            className={`flex-1 disabled:opacity-40 text-white text-xs font-semibold py-2 rounded-lg transition-colors ${
+                              actionType === "approve"
+                                ? "bg-green-600 hover:bg-green-500"
+                                : "bg-red-700 hover:bg-red-600"
+                            }`}
+                          >
+                            {submitting
+                              ? "Saving…"
+                              : actionType === "approve"
+                              ? "Confirm Approval"
+                              : "Confirm Decline"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Approved / rejected — show decision date, note, and payment status */}
-                {(req.status === "approved" || req.status === "rejected") && (req.respondedAt || req.responseNote || req.paidAt) && (
+                {/* Approved / rejected — show decision details and payment status */}
+                {(req.status === "approved" || req.status === "rejected") &&
+                  (req.respondedAt || req.responseNote || req.paidAt) && (
                   <div className="px-5 pb-5 pt-4 border-t border-slate-800 space-y-2">
                     {req.respondedAt && (
                       <p className="text-xs text-slate-600">

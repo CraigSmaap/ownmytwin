@@ -18,6 +18,8 @@ export default async function AdminPage() {
     freeUsers,
     proUsers,
     verifiedUsers,
+    kycVerifiedUsers,
+    pendingKyc,
     signupsThisMonth,
     signupsLastMonth,
     totalTwins,
@@ -39,6 +41,8 @@ export default async function AdminPage() {
     db.user.count({ where: { plan: "free" } }),
     db.user.count({ where: { plan: "pro" } }),
     db.user.count({ where: { emailVerified: { not: null } } }),
+    db.user.count({ where: { verificationStatus: "verified" } }),
+    db.verificationRequest.count({ where: { status: "pending" } }),
     db.user.count({ where: { createdAt: { gte: monthStart } } }),
     db.user.count({ where: { createdAt: { gte: lastMonthStart, lt: monthStart } } }),
     db.twin.count(),
@@ -116,7 +120,10 @@ export default async function AdminPage() {
           <h1 className="text-3xl font-bold text-white">God View</h1>
           <p className="text-slate-400 text-sm mt-1">Platform revenue, growth, and activity</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
+          <Link href="/admin/verification" className="bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors border border-slate-700">
+            KYC Queue {pendingKyc > 0 && <span className="ml-1.5 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingKyc}</span>}
+          </Link>
           <Link href="/admin/requests" className="bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors border border-slate-700">
             Requests {pendingRequests > 0 && <span className="ml-1.5 bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingRequests}</span>}
           </Link>
@@ -305,6 +312,7 @@ export default async function AdminPage() {
             <h2 className="font-semibold text-white mb-4">Engagement</h2>
             <div className="space-y-4">
               <Meter label="Email verified"    value={verifiedUsers}          total={totalUsers}       color="green"  />
+              <Meter label="KYC verified"      value={kycVerifiedUsers}       total={totalUsers}       color="green"  />
               <Meter label="Twin configured"   value={configuredTwins}        total={totalTwins || 1}  color="indigo" />
               <Meter label="Active this week"  value={activeThisWeek.length}  total={totalTwins || 1}  color="violet" />
             </div>

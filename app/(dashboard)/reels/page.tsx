@@ -25,10 +25,10 @@ const TWEAKS = [
 ];
 
 const LABEL_STYLES: Record<string, string> = {
-  "Hook-First":    "bg-indigo-900/50 text-indigo-300 border-indigo-700/60",
-  "Storytelling":  "bg-rose-900/50 text-rose-300 border-rose-700/60",
-  "Direct & Bold": "bg-amber-900/50 text-amber-300 border-amber-700/60",
-  "Tweaked":       "bg-violet-900/50 text-violet-300 border-violet-700/60",
+  "Hook-First":    "bg-indigo-900/40 text-indigo-300 border-indigo-700/50",
+  "Storytelling":  "bg-rose-900/40 text-rose-300 border-rose-700/50",
+  "Direct & Bold": "bg-amber-900/40 text-amber-300 border-amber-700/50",
+  "Tweaked":       "bg-violet-900/40 text-violet-300 border-violet-700/50",
 };
 
 interface Reel {
@@ -131,7 +131,7 @@ export default function ReelCreatorPage() {
                   className={`flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl text-xs font-medium transition-all touch-manipulation ${
                     platform === p.value
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/50"
-                      : "bg-slate-800 text-slate-400 active:bg-slate-700 border border-slate-700"
+                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-600"
                   }`}
                 >
                   <span>{p.icon}</span><span>{p.label}</span>
@@ -188,7 +188,7 @@ export default function ReelCreatorPage() {
           </button>
 
           {error && (
-            <div className="bg-red-900/20 border border-red-800/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+            <div className="bg-red-900/40 border border-red-800/50 rounded-xl px-4 py-3 text-red-300 text-sm">
               {error}
             </div>
           )}
@@ -214,8 +214,8 @@ export default function ReelCreatorPage() {
                     onClick={() => setSelectedIdx(idx)}
                     className={`rounded-2xl border p-5 cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-slate-900 border-indigo-600/60 shadow-lg shadow-indigo-900/20"
-                        : "bg-slate-900/60 border-slate-800 hover:border-slate-700"
+                        ? "bg-slate-900 border-indigo-500/60"
+                        : "bg-slate-800/40 border-slate-700 hover:border-indigo-500"
                     }`}
                   >
                     {/* Card header */}
@@ -236,8 +236,8 @@ export default function ReelCreatorPage() {
                           }
                           className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all border ${
                             copied === `caption-${idx}`
-                              ? "bg-green-900/50 text-green-400 border-green-800"
-                              : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                              ? "bg-green-900/40 text-green-400 border-green-800/50"
+                              : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                           }`}
                         >
                           {copied === `caption-${idx}` ? "✓ Copied!" : "Copy Caption"}
@@ -246,8 +246,8 @@ export default function ReelCreatorPage() {
                           onClick={() => handleCopy(allText, `all-${idx}`)}
                           className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all border ${
                             copied === `all-${idx}`
-                              ? "bg-green-900/50 text-green-400 border-green-800"
-                              : "bg-indigo-900/40 hover:bg-indigo-900/70 text-indigo-300 border-indigo-800/60"
+                              ? "bg-green-900/40 text-green-400 border-green-800/50"
+                              : "bg-indigo-900/40 text-indigo-300 border-indigo-700/50 hover:border-indigo-600"
                           }`}
                         >
                           {copied === `all-${idx}` ? "✓ Copied!" : "Copy All"}
@@ -256,7 +256,7 @@ export default function ReelCreatorPage() {
                     </div>
 
                     {/* Hook */}
-                    <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3 mb-3">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 mb-3">
                       <p className="text-xs text-indigo-400 font-semibold mb-1.5 uppercase tracking-wide">🎣 Hook</p>
                       <p className="text-white font-semibold text-sm leading-relaxed">{reel.hook}</p>
                     </div>
@@ -265,23 +265,23 @@ export default function ReelCreatorPage() {
                     {reel.script && (
                       <div className="mb-3">
                         <p className="text-xs text-slate-500 font-semibold mb-1.5 uppercase tracking-wide">📜 Script</p>
-                        <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{reel.script}</p>
+                        <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{reel.script}</p>
                       </div>
                     )}
 
                     {/* Caption */}
                     {reel.caption && (
-                      <div className="mb-3 pt-3 border-t border-slate-800">
+                      <div className="mb-3 pt-3 border-t border-slate-700">
                         <p className="text-xs text-slate-500 font-semibold mb-1.5 uppercase tracking-wide">📝 Caption</p>
-                        <p className="text-slate-300 text-sm leading-relaxed">{reel.caption}</p>
+                        <p className="text-slate-200 text-sm leading-relaxed">{reel.caption}</p>
                       </div>
                     )}
 
                     {/* Hashtags */}
                     {reel.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800">
+                      <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-700">
                         {reel.hashtags.map((tag) => (
-                          <span key={tag} className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+                          <span key={tag} className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">
                             #{tag}
                           </span>
                         ))}
@@ -292,7 +292,7 @@ export default function ReelCreatorPage() {
               })}
 
               {/* Tweak bar */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-slate-500 mr-1">Tweak selected:</span>
                 {TWEAKS.map((t) => (
                   <button
@@ -301,8 +301,8 @@ export default function ReelCreatorPage() {
                     disabled={!!tweaking}
                     className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
                       tweaking === t.key
-                        ? "bg-indigo-900/50 text-indigo-300 border-indigo-700"
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                        ? "bg-indigo-900/40 text-indigo-300 border-indigo-700/50"
+                        : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                     }`}
                   >
                     {tweaking === t.key && (
@@ -314,12 +314,12 @@ export default function ReelCreatorPage() {
               </div>
             </>
           ) : (
-            <div className="bg-slate-900/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[300px]">
+            <div className="bg-slate-800/40 border border-slate-700 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[300px]">
               <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl mb-4">
                 🎬
               </div>
               <p className="text-slate-400 text-sm font-medium">3 reel scripts will appear here</p>
-              <p className="text-slate-600 text-xs mt-1">Hook-First · Storytelling · Direct & Bold</p>
+              <p className="text-slate-500 text-xs mt-1">Hook-First · Storytelling · Direct & Bold</p>
             </div>
           )}
         </div>

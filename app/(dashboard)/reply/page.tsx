@@ -13,10 +13,10 @@ const PLATFORMS: { value: Platform; label: string; icon: string }[] = [
 ];
 
 const LABEL_STYLES: Record<string, string> = {
-  Natural:      "bg-indigo-900/50 text-indigo-300 border-indigo-700/60",
-  Brief:        "bg-cyan-900/50 text-cyan-300 border-cyan-700/60",
-  Warm:         "bg-rose-900/50 text-rose-300 border-rose-700/60",
-  Tweaked:      "bg-violet-900/50 text-violet-300 border-violet-700/60",
+  Natural:      "bg-indigo-900/40 text-indigo-300 border-indigo-700/50",
+  Brief:        "bg-cyan-900/40 text-cyan-300 border-cyan-700/50",
+  Warm:         "bg-rose-900/40 text-rose-300 border-rose-700/50",
+  Tweaked:      "bg-violet-900/40 text-violet-300 border-violet-700/50",
 };
 
 const TWEAKS = [
@@ -194,7 +194,7 @@ export default function ReplyPage() {
 
       {/* Twin not configured warning */}
       {twinReady === false && (
-        <div className="flex items-center gap-3 bg-amber-900/20 border border-amber-800/50 rounded-2xl px-5 py-4">
+        <div className="flex items-center gap-3 bg-amber-900/40 border border-amber-800/50 rounded-2xl px-5 py-4">
           <span className="text-2xl">⚠️</span>
           <div>
             <p className="text-amber-300 font-medium text-sm">Your Twin isn&apos;t configured yet</p>
@@ -223,7 +223,7 @@ export default function ReplyPage() {
                   className={`flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl text-xs font-medium transition-all touch-manipulation ${
                     platform === p.value
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/50"
-                      : "bg-slate-800 text-slate-400 active:bg-slate-700 border border-slate-700"
+                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-600"
                   }`}
                 >
                   <span>{p.icon}</span><span>{p.label}</span>
@@ -272,7 +272,7 @@ export default function ReplyPage() {
           </button>
 
           {error && (
-            <div className="bg-red-900/20 border border-red-800/50 rounded-xl px-4 py-3 text-red-300 text-sm">
+            <div className="bg-red-900/40 border border-red-800/50 rounded-xl px-4 py-3 text-red-300 text-sm">
               {error}
             </div>
           )}
@@ -294,8 +294,8 @@ export default function ReplyPage() {
                     onClick={() => setSelectedIdx(idx)}
                     className={`rounded-2xl border p-5 cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-slate-900 border-indigo-600/60 shadow-lg shadow-indigo-900/20"
-                        : "bg-slate-900/60 border-slate-800 hover:border-slate-700"
+                        ? "bg-slate-900 border-indigo-500/60"
+                        : "bg-slate-800/40 border-slate-700 hover:border-indigo-500"
                     }`}
                   >
                     {/* Card header */}
@@ -310,8 +310,8 @@ export default function ReplyPage() {
                             disabled={speaking !== null}
                             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all border ${
                               isSpeaking
-                                ? "bg-indigo-900/50 text-indigo-400 border-indigo-800"
-                                : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                                ? "bg-indigo-900/40 text-indigo-300 border-indigo-700/50"
+                                : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                             }`}
                           >
                             {isSpeaking ? "🔊 Playing..." : "🔊"}
@@ -321,8 +321,8 @@ export default function ReplyPage() {
                           onClick={() => handleCopy(idx)}
                           className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all border ${
                             isCopied
-                              ? "bg-green-900/50 text-green-400 border-green-800"
-                              : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                              ? "bg-green-900/40 text-green-400 border-green-800/50"
+                              : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                           }`}
                         >
                           {isCopied ? "✓ Copied!" : "Copy"}
@@ -331,22 +331,22 @@ export default function ReplyPage() {
                     </div>
 
                     {/* Content */}
-                    <p className="text-white leading-relaxed whitespace-pre-wrap text-sm">{r.content}</p>
+                    <p className="text-slate-200 leading-relaxed whitespace-pre-wrap text-sm">{r.content}</p>
 
                     {/* Teach Twin controls */}
-                    <div className="mt-3 pt-3 border-t border-slate-800" onClick={(e) => e.stopPropagation()}>
+                    <div className="mt-3 pt-3 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
                       {teachSaved === idx ? (
                         <p className="text-xs text-teal-400 font-medium">✓ Saved — your twin will learn from this</p>
                       ) : teachingIdx === idx ? (
                         <div className="space-y-2">
-                          <p className="text-xs text-slate-400">What would you actually say?</p>
+                          <p className="text-xs text-slate-500">What would you actually say?</p>
                           <textarea
                             value={correction}
                             onChange={(e) => setCorrection(e.target.value)}
                             placeholder="Type your preferred reply here..."
                             rows={3}
                             autoFocus
-                            className="w-full bg-slate-800 border border-teal-700/50 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm leading-relaxed"
+                            className="w-full bg-slate-800 border border-teal-700 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm leading-relaxed"
                           />
                           <div className="flex gap-2">
                             <button
@@ -378,7 +378,7 @@ export default function ReplyPage() {
               })}
 
               {/* Tweak bar */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap">
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-slate-500 mr-1">Tweak selected:</span>
                 {TWEAKS.map((t) => (
                   <button
@@ -387,8 +387,8 @@ export default function ReplyPage() {
                     disabled={!!tweaking}
                     className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
                       tweaking === t.key
-                        ? "bg-indigo-900/50 text-indigo-300 border-indigo-700"
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
+                        ? "bg-indigo-900/40 text-indigo-300 border-indigo-700/50"
+                        : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                     }`}
                   >
                     {tweaking === t.key && (
@@ -400,12 +400,12 @@ export default function ReplyPage() {
               </div>
             </>
           ) : (
-            <div className="bg-slate-900/40 border border-slate-800 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[300px]">
+            <div className="bg-slate-800/40 border border-slate-700 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[300px]">
               <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-2xl mb-4">
                 ✦
               </div>
               <p className="text-slate-400 text-sm font-medium">3 reply options will appear here</p>
-              <p className="text-slate-600 text-xs mt-1">Natural · Brief · Warm</p>
+              <p className="text-slate-500 text-xs mt-1">Natural · Brief · Warm</p>
             </div>
           )}
         </div>
@@ -430,10 +430,10 @@ export default function ReplyPage() {
                       {new Date(incoming.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 line-clamp-2 mb-3 pb-3 border-b border-slate-800">
+                  <p className="text-xs text-slate-500 line-clamp-2 mb-3 pb-3 border-b border-slate-700">
                     {incoming.content}
                   </p>
-                  <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{rep.content}</p>
+                  <p className="text-sm text-slate-200 leading-relaxed line-clamp-3">{rep.content}</p>
                 </div>
               );
             })}

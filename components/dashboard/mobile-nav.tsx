@@ -6,50 +6,55 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 interface Props {
-  userName:         string;
-  photoUrl:         string | null;
-  isAdmin?:         boolean;
-  accountType?:     string;
-  pendingRequests?: number;
+  userName:            string;
+  photoUrl:            string | null;
+  isAdmin?:            boolean;
+  accountType?:        string;
+  pendingRequests?:    number;
+  verificationStatus?: string;
 }
 
 const TALENT_ITEMS = [
-  { href: "/dashboard",   label: "Dashboard",    icon: "🏠", badge: 0 },
-  { href: "/reply",       label: "Reply For Me",  icon: "💬", badge: 0 },
-  { href: "/reels",       label: "Reel Creator",  icon: "🎬", badge: 0 },
-  { href: "/chat",        label: "Talk to Twin",  icon: "🪞", badge: 0 },
-  { href: "/twin",        label: "My Twin",      icon: "🤖", badge: 0 },
-  { href: "/memories",    label: "Memories",     icon: "🧠", badge: 0 },
-  { href: "/licensing",   label: "Licensing",    icon: "📜", badge: 0 },
-  { href: "/requests",    label: "Requests",     icon: "📬", badge: 0 },
-  { href: "/marketplace", label: "Marketplace",  icon: "🏪", badge: 0 },
-  { href: "/developer",   label: "Developer",    icon: "🔑", badge: 0 },
-  { href: "/settings",    label: "Settings",     icon: "⚙️", badge: 0 },
+  { href: "/dashboard",   label: "Dashboard",       icon: "🏠", badge: 0 },
+  { href: "/reply",       label: "Reply For Me",     icon: "💬", badge: 0 },
+  { href: "/reels",       label: "Reel Creator",     icon: "🎬", badge: 0 },
+  { href: "/chat",        label: "Talk to Twin",     icon: "🪞", badge: 0 },
+  { href: "/twin",        label: "My Twin",          icon: "🤖", badge: 0 },
+  { href: "/memories",    label: "Memories",         icon: "🧠", badge: 0 },
+  { href: "/licensing",   label: "Licensing",        icon: "📜", badge: 0 },
+  { href: "/requests",    label: "Requests",         icon: "📬", badge: 0 },
+  { href: "/marketplace", label: "Marketplace",      icon: "🏪", badge: 0 },
+  { href: "/verify",      label: "Verify Identity",  icon: "🛡️", badge: 0 },
+  { href: "/developer",   label: "Developer",        icon: "🔑", badge: 0 },
+  { href: "/settings",    label: "Settings",         icon: "⚙️", badge: 0 },
 ];
 
 const BUYER_ITEMS = [
   { href: "/dashboard",   label: "Dashboard",   icon: "🏠", badge: 0 },
   { href: "/marketplace", label: "Marketplace", icon: "🏪", badge: 0 },
   { href: "/my-requests", label: "My Requests", icon: "📬", badge: 0 },
+  { href: "/showcase",    label: "Showcase",    icon: "🎬", badge: 0 },
   { href: "/settings",    label: "Settings",    icon: "⚙️", badge: 0 },
 ];
 
-export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent", pendingRequests = 0 }: Props) {
+export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent", pendingRequests = 0, verificationStatus = "unverified" }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isBuyer = accountType === "buyer";
 
   useEffect(() => { setOpen(false); }, [pathname]);
-
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  const verifyNeedsAction = verificationStatus === "unverified" || verificationStatus === "rejected";
   const baseItems  = isBuyer ? BUYER_ITEMS : TALENT_ITEMS;
-  const navItems   = baseItems.map((item) =>
-    item.href === "/requests" ? { ...item, badge: pendingRequests } : item
-  );
+  const navItems   = baseItems.map((item) => {
+    if (item.href === "/requests") return { ...item, badge: pendingRequests };
+    if (item.href === "/verify")   return { ...item, badge: verifyNeedsAction ? 1 : 0 };
+    return item;
+  });
   const activeClass = isBuyer ? "bg-violet-600 text-white" : "bg-indigo-600 text-white";
 
   return (
@@ -82,17 +87,12 @@ export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent",
         </div>
       </div>
 
-      {/* Overlay */}
       {open && (
-        <div
-          className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
-        />
+        <div className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
       )}
 
       {/* Drawer */}
       <div className={`md:hidden fixed top-0 left-0 bottom-0 z-50 w-72 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="bg-white rounded-xl px-3 py-2">
             <Image src="/ownmytwin-logo.png" alt="OwnMyTwin" width={120} height={40} className="object-contain" />
@@ -104,7 +104,6 @@ export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent",
           </button>
         </div>
 
-        {/* User */}
         <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-3">
           <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-700 border border-slate-600 shrink-0 flex items-center justify-center">
             {photoUrl ? (
@@ -119,7 +118,6 @@ export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent",
           </div>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const active = pathname === item.href;
@@ -135,31 +133,28 @@ export function MobileNav({ userName, photoUrl, isAdmin, accountType = "talent",
                 <span className="flex-1">{item.label}</span>
                 {item.badge > 0 && (
                   <span className="bg-amber-500 text-slate-900 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                    {item.badge}
+                    {item.href === "/verify" ? "!" : item.badge}
                   </span>
+                )}
+                {item.href === "/verify" && verificationStatus === "verified" && (
+                  <span className="text-green-400 text-xs">✓</span>
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Admin link */}
         {isAdmin && (
           <div className="px-3 pb-2 border-t border-slate-800 pt-3">
-            <Link href="/admin"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-900/30 hover:text-red-300 transition-colors touch-manipulation">
+            <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-900/30 hover:text-red-300 transition-colors touch-manipulation">
               <span>🛡️</span>
               <span>Admin Panel</span>
             </Link>
           </div>
         )}
 
-        {/* Sign out */}
         <div className="p-4 border-t border-slate-800">
-          <Link
-            href="/login"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors text-sm touch-manipulation"
-          >
+          <Link href="/login" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors text-sm touch-manipulation">
             <span>🚪</span>
             <span>Sign out</span>
           </Link>

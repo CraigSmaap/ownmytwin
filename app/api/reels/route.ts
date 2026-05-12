@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, cachedSystem } from "@/lib/anthropic";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const PLATFORM_CONTEXT: Record<string, string> = {
   tiktok:    "TikTok (short-form vertical video, Gen Z / millennial audience, fast-paced, trending hooks, energetic)",
@@ -61,6 +62,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Reel Creator requires a Pro plan." }, { status: 403 });
   }
 
+  if (!tweak) {
+    const rate = await checkRateLimit(session.user.id, "reels", "pro");
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: `Daily reel limit reached (${rate.limit}/day). Try again tomorrow.` },
+        { status: 429 },
+      );
+    }
+  }
+
   const memoryContext =
     twin.memories.length > 0
       ? `\n\nPersonal context and memories to draw from:\n${twin.memories.map((m) => `- ${m.title}: ${m.content}`).join("\n")}`
@@ -87,7 +98,7 @@ export async function POST(req: Request) {
     const res = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1500,
-      system: systemPrompt,
+      system: cachedSystem(systemPrompt),
       messages: [{ role: "user", content: tweakPrompt }],
     });
 
@@ -125,7 +136,7 @@ export async function POST(req: Request) {
   const res = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 3000,
-    system: systemPrompt,
+    system: cachedSystem(systemPrompt),
     messages: [{ role: "user", content: userPrompt }],
   });
 

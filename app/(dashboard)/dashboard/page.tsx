@@ -41,10 +41,7 @@ export default async function DashboardPage() {
 
   const [user, twin, photos, voiceRecordings] = await Promise.all([
     db.user.findUnique({ where: { id: userId }, select: { name: true, image: true, createdAt: true, onboardingComplete: true, publicSlug: true, accountType: true, buyerProfile: true, role: true } }),
-    db.twin.findUnique({
-      where: { userId },
-      include: { _count: { select: { memories: true, messages: true } } },
-    }),
+    db.twin.findUnique({ where: { userId }, include: { _count: { select: { memories: true, messages: true } } } }),
     db.likenessPhoto.count({ where: { userId } }),
     db.voiceRecording.count({ where: { userId } }),
   ]);
@@ -52,7 +49,6 @@ export default async function DashboardPage() {
   if (user?.role === "admin")            redirect("/admin");
   if (user && !user.onboardingComplete) redirect("/onboarding");
 
-  // Buyer dashboard — show their submitted requests and marketplace CTA
   if (user?.accountType === "buyer") {
     const buyerRequests = await db.licenseRequest.findMany({
       where:   { buyerId: userId },
@@ -60,28 +56,16 @@ export default async function DashboardPage() {
       take:    10,
       include: { twin: { select: { name: true, user: { select: { name: true } } } } },
     });
-    const firstName = user.name?.split(" ")[0] ?? "there";
-    return <BuyerDashboard firstName={firstName} requests={buyerRequests} />;
+    return <BuyerDashboard firstName={user.name?.split(" ")[0] ?? "there"} requests={buyerRequests} />;
   }
 
   const [recentMessages, recentMemories] = twin
     ? await Promise.all([
-        db.message.findMany({
-          where: { twinId: twin.id },
-          orderBy: { createdAt: "desc" },
-          take: 12,
-          select: { id: true, role: true, content: true, platform: true, createdAt: true },
-        }),
-        db.memory.findMany({
-          where: { twinId: twin.id },
-          orderBy: { createdAt: "desc" },
-          take: 3,
-          select: { id: true, title: true, content: true, category: true },
-        }),
+        db.message.findMany({ where: { twinId: twin.id }, orderBy: { createdAt: "desc" }, take: 12, select: { id: true, role: true, content: true, platform: true, createdAt: true } }),
+        db.memory.findMany({ where: { twinId: twin.id }, orderBy: { createdAt: "desc" }, take: 3, select: { id: true, title: true, content: true, category: true } }),
       ])
     : [[], []];
 
-  // Pair user → assistant messages
   type MsgRow = typeof recentMessages[number];
   const replyPairs: { incoming: MsgRow; reply: MsgRow }[] = [];
   for (let i = 0; i < recentMessages.length; i++) {
@@ -99,29 +83,27 @@ export default async function DashboardPage() {
   const toneTags       = personality?.tone?.slice(0, 4) ?? [];
   const valueTags      = personality?.values?.slice(0, 4) ?? [];
 
-  const checks = [twinConfigured, memCount > 0, replyCount > 0, photos > 0, voiceRecordings > 0];
+  const checks     = [twinConfigured, memCount > 0, replyCount > 0, photos > 0, voiceRecordings > 0];
   const completeness = Math.round((checks.filter(Boolean).length / checks.length) * 100);
-
-  const firstName = user?.name?.split(" ")[0] ?? "there";
-  const hour      = new Date().getHours();
-  const greeting  = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName  = user?.name?.split(" ")[0] ?? "there";
+  const hour       = new Date().getHours();
+  const greeting   = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   const SETUP_ITEMS = [
-    { label: "Configure your Twin",      done: twinConfigured,     href: "/twin",     icon: "🤖" },
-    { label: "Add your first memory",    done: memCount > 0,       href: "/memories", icon: "🧠" },
-    { label: "Generate your first reply",done: replyCount > 0,     href: "/reply",    icon: "💬" },
-    { label: "Upload likeness photos",   done: photos > 0,         href: "/twin",     icon: "📸" },
-    { label: "Record your voice samples",done: voiceRecordings > 0,href: "/twin",     icon: "🎙️" },
+    { label: "Configure your Twin",       done: twinConfigured,     href: "/twin",     icon: "🤖" },
+    { label: "Add your first memory",     done: memCount > 0,       href: "/memories", icon: "🧠" },
+    { label: "Generate your first reply", done: replyCount > 0,     href: "/reply",    icon: "💬" },
+    { label: "Upload likeness photos",    done: photos > 0,         href: "/twin",     icon: "📸" },
+    { label: "Record your voice samples", done: voiceRecordings > 0,href: "/twin",     icon: "🎙️" },
   ];
   const allDone = SETUP_ITEMS.every(s => s.done);
 
   return (
     <div className="max-w-6xl space-y-6">
 
-      {/* ── POPIA notice ── */}
       <PopiaBanner />
 
-      {/* ── Hero greeting ── */}
+      {/* Hero greeting */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900/50 via-slate-900 to-slate-900 border border-indigo-800/30 rounded-2xl p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -139,29 +121,22 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
-          <Link
-            href="/reply"
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors shrink-0 touch-manipulation"
-          >
+          <Link href="/reply" className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors shrink-0 touch-manipulation">
             <span>💬</span> Generate Reply
           </Link>
         </div>
-
         <div className="relative mt-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-slate-500 font-medium">Twin completeness</span>
             <span className="text-xs font-bold text-indigo-400">{completeness}%</span>
           </div>
           <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
-              style={{ width: `${completeness}%` }}
-            />
+            <div className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700" style={{ width: `${completeness}%` }} />
           </div>
         </div>
       </div>
 
-      {/* ── Stats ── */}
+      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Replies Generated" value={replyCount}      icon="💬" color="indigo" href="/reply"    />
         <StatCard label="Memories Stored"   value={memCount}        icon="🧠" color="violet" href="/memories" />
@@ -169,13 +144,11 @@ export default async function DashboardPage() {
         <StatCard label="Voice Samples"     value={voiceRecordings} icon="🎙️" color="cyan"   href="/twin"     />
       </div>
 
-      {/* ── Main grid ── */}
+      {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
-        {/* Left 2/3 */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Setup checklist */}
           {!allDone && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-5">
@@ -207,7 +180,6 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {/* Recent Replies — conversation pairs */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-semibold text-white">Recent Replies</h2>
@@ -219,19 +191,15 @@ export default async function DashboardPage() {
                   const icon = PLATFORM_ICONS[reply.platform ?? "other"] ?? "💭";
                   return (
                     <div key={reply.id} className="rounded-xl border border-slate-800 overflow-hidden">
-                      {/* Incoming */}
                       <div className="bg-slate-800/40 px-4 py-3 border-b border-slate-800">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className="text-sm">{icon}</span>
                           <span className="text-xs text-slate-500 capitalize">{reply.platform ?? "message"}</span>
                           <span className="text-xs text-slate-700">·</span>
-                          <span className="text-xs text-slate-600">
-                            {new Date(reply.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                          </span>
+                          <span className="text-xs text-slate-600">{new Date(reply.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
                         </div>
                         <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{incoming.content}</p>
                       </div>
-                      {/* Reply */}
                       <div className="px-4 py-3 flex gap-2">
                         <div className="w-5 h-5 rounded-full bg-indigo-600/30 border border-indigo-700/50 flex items-center justify-center text-xs shrink-0 mt-0.5">🤖</div>
                         <p className="text-sm text-slate-200 leading-relaxed line-clamp-3">{reply.content}</p>
@@ -252,13 +220,9 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Right 1/3 */}
         <div className="space-y-4">
+          <DailyUpdate twinId={twin?.id ?? null} />
 
-          {/* Daily update */}
-          <DailyUpdate />
-
-          {/* Twin profile card */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${twinConfigured ? "bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" : "bg-amber-400"}`} />
@@ -268,7 +232,6 @@ export default async function DashboardPage() {
               </span>
             </div>
 
-            {/* Identity */}
             {(personality?.profession || personality?.location) && (
               <div className="space-y-1 text-xs text-slate-400">
                 {personality.profession && <p>💼 {personality.profession}</p>}
@@ -277,7 +240,6 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* Tone tags */}
             {toneTags.length > 0 && (
               <div>
                 <p className="text-xs text-slate-600 mb-2">Tone</p>
@@ -289,7 +251,6 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* Value tags */}
             {valueTags.length > 0 && (
               <div>
                 <p className="text-xs text-slate-600 mb-2">Values</p>
@@ -301,7 +262,6 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* Counters */}
             <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-2 text-center">
               {[
                 { label: "Memories", value: memCount,        color: "text-violet-400" },
@@ -321,17 +281,16 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          {/* Quick actions */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
             <h2 className="font-semibold text-white mb-4">Quick Actions</h2>
             <div className="space-y-2">
               {[
-                { href: "/reply",    icon: "💬", label: "Generate a Reply",  desc: "In your exact voice" },
-                { href: "/memories", icon: "🧠", label: "Add a Memory",      desc: "Teach your Twin" },
+                { href: "/reply",    icon: "💬", label: "Generate a Reply",  desc: "In your exact voice"   },
+                { href: "/memories", icon: "🧠", label: "Add a Memory",      desc: "Teach your Twin"       },
                 { href: "/twin",     icon: "🎙️", label: "Record Voice",      desc: "Voice profile samples" },
+                { href: "/showcase", icon: "🎬", label: "Showcase Feed",     desc: "See what's been made"  },
               ].map((a) => (
-                <Link key={a.href} href={a.href}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition-colors group touch-manipulation">
+                <Link key={a.href} href={a.href} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition-colors group touch-manipulation">
                   <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base shrink-0 group-hover:border-indigo-600 transition-colors">
                     {a.icon}
                   </div>
@@ -344,13 +303,10 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Share your twin */}
           <ShareLinkCard slug={user?.publicSlug ?? null} />
-
         </div>
       </div>
 
-      {/* ── Recent Memories ── */}
       {recentMemories.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -359,7 +315,7 @@ export default async function DashboardPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {recentMemories.map((mem) => {
-              const cat = mem.category ?? "other";
+              const cat   = mem.category ?? "other";
               const style = CATEGORY_STYLES[cat] ?? CATEGORY_STYLES.other;
               const icon  = CATEGORY_ICONS[cat]  ?? "📝";
               return (
@@ -383,11 +339,7 @@ export default async function DashboardPage() {
 }
 
 type BuyerRequest = {
-  id: string;
-  status: string;
-  usageType: string;
-  message: string;
-  createdAt: Date;
+  id: string; status: string; usageType: string; message: string; createdAt: Date;
   twin: { name: string | null; user: { name: string | null } } | null;
 };
 
@@ -414,11 +366,8 @@ function BuyerDashboard({ firstName, requests }: { firstName: string; requests: 
 
   return (
     <div className="max-w-4xl space-y-6">
-
-      {/* ── POPIA notice ── */}
       <PopiaBanner />
 
-      {/* Hero */}
       <div className="relative overflow-hidden bg-gradient-to-br from-violet-900/50 via-slate-900 to-slate-900 border border-violet-800/30 rounded-2xl p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -426,26 +375,20 @@ function BuyerDashboard({ firstName, requests }: { firstName: string; requests: 
             <p className="text-slate-400 text-sm">{greeting}</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{firstName} 👋</h1>
             <p className="text-slate-400 text-sm mt-0.5">
-              {requests.length === 0
-                ? "Browse the marketplace to find AI twins to license."
-                : `You have ${requests.length} license request${requests.length !== 1 ? "s" : ""} submitted.`}
+              {requests.length === 0 ? "Browse the marketplace to find AI twins to license." : `You have ${requests.length} license request${requests.length !== 1 ? "s" : ""} submitted.`}
             </p>
           </div>
-          <Link
-            href="/marketplace"
-            className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors shrink-0 touch-manipulation"
-          >
+          <Link href="/marketplace" className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors shrink-0 touch-manipulation">
             <span>🏪</span> Browse Marketplace
           </Link>
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Requests",  value: requests.length, color: "text-violet-400", bg: "from-violet-500/10 border-violet-800/40" },
-          { label: "Pending",         value: pending,         color: "text-amber-400",  bg: "from-amber-500/10 border-amber-800/40"  },
-          { label: "Approved",        value: approved,        color: "text-green-400",  bg: "from-green-500/10 border-green-800/40"  },
+          { label: "Total Requests", value: requests.length, color: "text-violet-400", bg: "from-violet-500/10 border-violet-800/40" },
+          { label: "Pending",        value: pending,         color: "text-amber-400",  bg: "from-amber-500/10 border-amber-800/40"  },
+          { label: "Approved",       value: approved,        color: "text-green-400",  bg: "from-green-500/10 border-green-800/40"  },
         ].map((s) => (
           <div key={s.label} className={`relative overflow-hidden bg-gradient-to-br ${s.bg} to-slate-900 border rounded-2xl p-4 sm:p-5`}>
             <p className={`text-2xl sm:text-3xl font-bold ${s.color} mb-0.5`}>{s.value}</p>
@@ -454,13 +397,11 @@ function BuyerDashboard({ firstName, requests }: { firstName: string; requests: 
         ))}
       </div>
 
-      {/* Requests list */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-semibold text-white">Your License Requests</h2>
           <Link href="/marketplace" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">Browse more →</Link>
         </div>
-
         {requests.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl">
             <p className="text-4xl mb-3">📬</p>
@@ -477,23 +418,15 @@ function BuyerDashboard({ firstName, requests }: { firstName: string; requests: 
                   <div className="min-w-0">
                     <p className="font-medium text-white text-sm">
                       {req.twin?.name ?? "Unknown Twin"}
-                      {req.twin?.user.name && (
-                        <span className="text-slate-500 font-normal"> by {req.twin.user.name}</span>
-                      )}
+                      {req.twin?.user.name && <span className="text-slate-500 font-normal"> by {req.twin.user.name}</span>}
                     </p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">
-                        {LICENSE_LABELS[req.usageType] ?? req.usageType}
-                      </span>
-                      <span className="text-xs text-slate-600">
-                        {new Date(req.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                      </span>
+                      <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">{LICENSE_LABELS[req.usageType] ?? req.usageType}</span>
+                      <span className="text-xs text-slate-600">{new Date(req.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                     </div>
                     <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">{req.message}</p>
                   </div>
-                  <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border capitalize ${STATUS_STYLES[req.status] ?? STATUS_STYLES.pending}`}>
-                    {req.status}
-                  </span>
+                  <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border capitalize ${STATUS_STYLES[req.status] ?? STATUS_STYLES.pending}`}>{req.status}</span>
                 </div>
               </div>
             ))}
@@ -501,19 +434,16 @@ function BuyerDashboard({ firstName, requests }: { firstName: string; requests: 
         )}
       </div>
 
-      {/* Quick actions */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 className="font-semibold text-white mb-4">Explore</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { href: "/marketplace", icon: "🏪", label: "Browse Marketplace",     desc: "Find and license AI twins" },
-            { href: "/settings",    icon: "⚙️", label: "Account Settings",        desc: "Update your buyer profile" },
+            { href: "/marketplace", icon: "🏪", label: "Browse Marketplace", desc: "Find and license AI twins"  },
+            { href: "/showcase",    icon: "🎬", label: "Showcase Feed",      desc: "See work made with twins"   },
+            { href: "/settings",    icon: "⚙️", label: "Account Settings",   desc: "Update your buyer profile"  },
           ].map((a) => (
-            <Link key={a.href} href={a.href}
-              className="flex items-center gap-3 p-4 rounded-xl border border-slate-800 hover:border-slate-700 hover:bg-slate-800/40 transition-colors group touch-manipulation">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base shrink-0 group-hover:border-violet-600 transition-colors">
-                {a.icon}
-              </div>
+            <Link key={a.href} href={a.href} className="flex items-center gap-3 p-4 rounded-xl border border-slate-800 hover:border-slate-700 hover:bg-slate-800/40 transition-colors group touch-manipulation">
+              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base shrink-0 group-hover:border-violet-600 transition-colors">{a.icon}</div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">{a.label}</p>
                 <p className="text-xs text-slate-500">{a.desc}</p>

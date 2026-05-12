@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { anthropic } from "@/lib/anthropic";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -10,6 +11,14 @@ export async function POST(req: Request) {
   const currentUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
   if (currentUser?.plan !== "pro") {
     return NextResponse.json({ error: "Writing style analysis requires a Pro plan." }, { status: 403 });
+  }
+
+  const rate = await checkRateLimit(session.user.id, "analyze", "pro");
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: `Daily analysis limit reached (${rate.limit}/day). Try again tomorrow.` },
+      { status: 429 },
+    );
   }
 
   const { samples } = (await req.json()) as { samples: string[] };

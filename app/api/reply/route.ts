@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, modelForPlan, cachedSystem } from "@/lib/anthropic";
 import { getRelevantMemories } from "@/lib/memory-search";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ReplyRequest } from "@/types";
 
 const TWEAK_INSTRUCTIONS: Record<string, string> = {
@@ -29,16 +30,19 @@ export async function POST(req: Request) {
 
   if (!twin) return NextResponse.json({ error: "Set up your Twin first" }, { status: 400 });
 
-  if (currentUser?.plan !== "pro" && !tweak) {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    const monthlyCount = await db.message.count({
-      where: { twinId: twin.id, role: "assistant", createdAt: { gte: monthStart } },
-    });
-    if (monthlyCount >= 10) {
-      return NextResponse.json({ error: "Monthly reply limit reached. Upgrade to Pro for unlimited replies." }, { status: 429 });
+  let remaining = 0;
+  let dailyLimit = 0;
+
+  if (!tweak) {
+    const rate = await checkRateLimit(session.user.id, "reply", currentUser?.plan ?? "free");
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: `Daily reply limit reached (${rate.limit}/day). ${currentUser?.plan === "pro" ? "Try again tomorrow." : "Upgrade to Pro for higher limits."}` },
+        { status: 429 },
+      );
     }
+    remaining  = rate.remaining;
+    dailyLimit = rate.limit;
   }
 
   const memories = await getRelevantMemories(twin.id, incomingMessage, 10);
@@ -62,9 +66,9 @@ export async function POST(req: Request) {
     ].filter(Boolean).join("\n");
 
     const res = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: modelForPlan(currentUser?.plan),
       max_tokens: 1024,
-      system: systemPrompt,
+      system: cachedSystem(systemPrompt),
       messages: [{ role: "user", content: tweakPrompt }],
     });
 
@@ -85,9 +89,9 @@ export async function POST(req: Request) {
   ].filter(Boolean).join("\n");
 
   const res = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+    model: modelForPlan(currentUser?.plan),
     max_tokens: 2048,
-    system: systemPrompt,
+    system: cachedSystem(systemPrompt),
     messages: [{ role: "user", content: userPrompt }],
   });
 
@@ -110,5 +114,5 @@ export async function POST(req: Request) {
     ],
   });
 
-  return NextResponse.json({ replies });
+  return NextResponse.json({ replies, remaining, limit: dailyLimit });
 }

@@ -4,40 +4,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface Props {
-  isAdmin?:        boolean;
-  accountType?:    string;
-  pendingRequests?: number;
+  isAdmin?:            boolean;
+  accountType?:        string;
+  pendingRequests?:    number;
+  verificationStatus?: string;
 }
 
 const TALENT_ITEMS = [
-  { href: "/dashboard",   label: "Dashboard",    icon: "🏠", badge: 0 },
-  { href: "/reply",       label: "Reply For Me",  icon: "💬", badge: 0 },
-  { href: "/reels",       label: "Reel Creator",  icon: "🎬", badge: 0 },
-  { href: "/chat",        label: "Talk to Twin",  icon: "🪞", badge: 0 },
-  { href: "/twin",        label: "My Twin",      icon: "🤖", badge: 0 },
-  { href: "/memories",    label: "Memories",     icon: "🧠", badge: 0 },
-  { href: "/licensing",   label: "Licensing",    icon: "📜", badge: 0 },
-  { href: "/requests",    label: "Requests",     icon: "📬", badge: 0 },
-  { href: "/marketplace", label: "Marketplace",  icon: "🏪", badge: 0 },
-  { href: "/developer",   label: "Developer",    icon: "🔑", badge: 0 },
-  { href: "/settings",    label: "Settings",     icon: "⚙️", badge: 0 },
+  { href: "/dashboard",   label: "Dashboard",       icon: "🏠", badge: 0 },
+  { href: "/reply",       label: "Reply For Me",     icon: "💬", badge: 0 },
+  { href: "/reels",       label: "Reel Creator",     icon: "🎬", badge: 0 },
+  { href: "/chat",        label: "Talk to Twin",     icon: "🪞", badge: 0 },
+  { href: "/twin",        label: "My Twin",          icon: "🤖", badge: 0 },
+  { href: "/memories",    label: "Memories",         icon: "🧠", badge: 0 },
+  { href: "/licensing",   label: "Licensing",        icon: "📜", badge: 0 },
+  { href: "/requests",    label: "Requests",         icon: "📬", badge: 0 },
+  { href: "/marketplace", label: "Marketplace",      icon: "🏪", badge: 0 },
+  { href: "/verify",      label: "Verify Identity",  icon: "🛡️", badge: 0 },
+  { href: "/developer",   label: "Developer",        icon: "🔑", badge: 0 },
+  { href: "/settings",    label: "Settings",         icon: "⚙️", badge: 0 },
 ];
 
 const BUYER_ITEMS = [
-  { href: "/dashboard",    label: "Dashboard",   icon: "🏠", badge: 0 },
-  { href: "/marketplace",  label: "Marketplace", icon: "🏪", badge: 0 },
-  { href: "/my-requests",  label: "My Requests", icon: "📬", badge: 0 },
-  { href: "/settings",     label: "Settings",    icon: "⚙️", badge: 0 },
+  { href: "/dashboard",   label: "Dashboard",   icon: "🏠", badge: 0 },
+  { href: "/marketplace", label: "Marketplace", icon: "🏪", badge: 0 },
+  { href: "/my-requests", label: "My Requests", icon: "📬", badge: 0 },
+  { href: "/showcase",    label: "Showcase",    icon: "🎬", badge: 0 },
+  { href: "/settings",    label: "Settings",    icon: "⚙️", badge: 0 },
 ];
 
-export function SidebarNav({ isAdmin, accountType = "talent", pendingRequests = 0 }: Props) {
+export function SidebarNav({ isAdmin, accountType = "talent", pendingRequests = 0, verificationStatus = "unverified" }: Props) {
   const pathname  = usePathname();
   const isBuyer   = accountType === "buyer";
   const baseItems = isBuyer ? BUYER_ITEMS : TALENT_ITEMS;
 
-  const NAV_ITEMS = baseItems.map((item) =>
-    item.href === "/requests" ? { ...item, badge: pendingRequests } : item
-  );
+  const verifyNeedsAction = verificationStatus === "unverified" || verificationStatus === "rejected";
+
+  const NAV_ITEMS = baseItems.map((item) => {
+    if (item.href === "/requests") return { ...item, badge: pendingRequests };
+    if (item.href === "/verify")   return { ...item, badge: verifyNeedsAction ? 1 : 0 };
+    return item;
+  });
 
   const activeClass = isBuyer ? "bg-violet-600 text-white" : "bg-indigo-600 text-white";
 
@@ -57,8 +64,11 @@ export function SidebarNav({ isAdmin, accountType = "talent", pendingRequests = 
             <span className="flex-1">{item.label}</span>
             {item.badge > 0 && (
               <span className="bg-amber-500 text-slate-900 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                {item.badge}
+                {item.href === "/verify" ? "!" : item.badge}
               </span>
+            )}
+            {item.href === "/verify" && verificationStatus === "verified" && (
+              <span className="text-green-400 text-xs">✓</span>
             )}
           </Link>
         );

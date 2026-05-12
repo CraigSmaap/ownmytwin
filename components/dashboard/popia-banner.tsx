@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function PopiaBanner() {
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("popia_banner_dismissed") === "1";
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("popia_banner_dismissed") === "1") {
+      setDismissed(true);
     }
-    return false;
-  });
+  }, []);
 
   function dismiss() {
     localStorage.setItem("popia_banner_dismissed", "1");

@@ -32,7 +32,7 @@ export default function RegisterPage() {
     }
 
     // Sign in immediately after successful registration
-    await signIn("credentials", { email, password, callbackUrl: "/dashboard" });
+    await signIn("credentials", { email, password, callbackUrl: "/showcase" });
     // signIn redirects on success; only reaches here on failure
     setError("Account created but sign-in failed. Try signing in manually.");
     setLoading(false);
@@ -54,7 +54,7 @@ export default function RegisterPage() {
 
             {/* Google */}
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl: "/showcase" })}
               className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-xl font-medium text-sm transition-colors shadow-sm"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">

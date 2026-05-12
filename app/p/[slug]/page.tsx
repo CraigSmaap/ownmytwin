@@ -43,6 +43,7 @@ async function getProfile(slug: string) {
   return db.user.findUnique({
     where: { publicSlug: slug },
     select: {
+      verificationStatus: true,
       photos: {
         orderBy: { createdAt: "asc" },
         take:    1,
@@ -118,6 +119,7 @@ export default async function PublicProfilePage(
   const personality = twin.personality as PersonalityData | null;
   const perms       = (twin.licensePermissions ?? {}) as Record<string, LicenseSetting>;
   const photoUrl    = user.photos[0]?.url ?? null;
+  const isVerified  = user.verificationStatus === "verified";
   const reviews     = twin.reviews ?? [];
   const reviewCount = reviews.length;
   const avgRating   = reviewCount > 0
@@ -181,9 +183,19 @@ export default async function PublicProfilePage(
           </div>
 
           {/* Identity */}
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 tracking-tight">
-            {twin.name ?? "AI Twin"}
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-2 flex-wrap">
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              {twin.name ?? "AI Twin"}
+            </h1>
+            {isVerified && (
+              <span className="inline-flex items-center gap-1 text-sm font-semibold bg-green-900/40 text-green-400 border border-green-800/50 px-2.5 py-1 rounded-full">
+                <svg className="w-4 h-4" viewBox="0 0 12 12" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 1a5 5 0 100 10A5 5 0 006 1zm2.78 3.97a.75.75 0 00-1.06-1.06L5.25 6.44 4.28 5.47a.75.75 0 00-1.06 1.06l1.5 1.5a.75.75 0 001.06 0l3-3z" clipRule="evenodd" />
+                </svg>
+                Verified Identity
+              </span>
+            )}
+          </div>
 
           {(personality?.profession || personality?.location) && (
             <p className="text-slate-400 text-base mb-6 flex items-center justify-center flex-wrap gap-x-3 gap-y-1">

@@ -289,7 +289,7 @@ function SettingsContent() {
 
         {isPro ? (
           <div className="space-y-3">
-            <p className="text-white font-semibold">OwnMyTwin Pro — R165/month</p>
+            <p className="text-white font-semibold">OwnMyTwin Pro — R499/month</p>
             {planExpiresAt && (
               <p className="text-xs text-slate-400">
                 Renews on {new Date(planExpiresAt).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" })}
@@ -306,7 +306,7 @@ function SettingsContent() {
         ) : (
           <div className="space-y-4">
             <div>
-              <p className="text-white font-semibold mb-1">Upgrade to Pro — R165/month</p>
+              <p className="text-white font-semibold mb-1">Upgrade to Pro — R499/month</p>
               <p className="text-sm text-slate-400">Unlock everything OwnMyTwin has to offer.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -334,7 +334,7 @@ function SettingsContent() {
               disabled={upgrading}
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
             >
-              {upgrading ? "Opening checkout..." : "Upgrade to Pro — R165/month"}
+              {upgrading ? "Opening checkout..." : "Upgrade to Pro — R499/month"}
             </button>
             <p className="text-xs text-slate-600 text-center">Cancel anytime via PayFast. South African payments supported.</p>
           </div>

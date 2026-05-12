@@ -29,37 +29,37 @@ const FEATURES = [
     icon: "💬",
     title: "Reply to every DM in your exact voice",
     desc: "Paste any message — brand deal, fan question, collab request. Your Twin replies exactly how you would. Your rhythm, your slang, your energy. Nobody can tell the difference.",
-    tag: "Live now", tagColor: "green",
+    tag: "Free + Pro", tagColor: "green",
   },
   {
     icon: "🎬",
     title: "Reel Creator — your voice, your content",
     desc: "Prompt your Twin to write captions, scripts, and reel hooks in your authentic style. Consistent content across every platform — without the creative block.",
-    tag: "Live now", tagColor: "green",
+    tag: "Pro only", tagColor: "purple",
   },
   {
     icon: "💰",
     title: "License your likeness to brands",
-    desc: "Brands want your face, your voice, your style in their AI campaigns. You set the rates. You set the rules. You approve every deal. You keep 80% of every rand.",
-    tag: "Live now", tagColor: "green",
+    desc: "Brands want your face, your voice, your style in their AI campaigns. You set the rates. You set the rules. You approve every deal. Pro earns 80%, Free earns 70%.",
+    tag: "Free + Pro", tagColor: "green",
   },
   {
     icon: "🪪",
     title: "Your complete digital identity",
     desc: "Personality, tone, values, humour, signature phrases — all captured and locked in. Not a generic chatbot. A genuine digital version of you that brands and fans can engage with.",
-    tag: "Live now", tagColor: "green",
+    tag: "Free + Pro", tagColor: "green",
   },
   {
     icon: "🧠",
     title: "Memory that never forgets",
     desc: "Your Twin knows your brand partnerships, your stories, your opinions, your history. Every response feels authentic because it genuinely reflects who you are.",
-    tag: "Live now", tagColor: "green",
+    tag: "Free + Pro", tagColor: "green",
   },
   {
-    icon: "🔒",
-    title: "You own it. No asterisks.",
-    desc: "Your data is never sold, never used to train models for other people. Export everything. Delete everything. No brand or platform touches your Twin without your explicit approval.",
-    tag: "Always", tagColor: "indigo",
+    icon: "🎙️",
+    title: "Voice cloning — sound exactly like you",
+    desc: "Train your Twin on your real voice. Your Twin can speak your replies out loud in your exact tone, accent, and energy. Powered by ElevenLabs.",
+    tag: "Pro only", tagColor: "purple",
   },
 ];
 
@@ -81,18 +81,24 @@ const PROOF_POINTS = [
 const PRICING = [
   {
     name: "Free",
-    price: "$0",
+    price: "R0",
     period: "forever",
     description: "Build your digital identity and start getting discovered.",
     features: [
-      "10 AI replies per month",
-      "Unlimited memories",
-      "Full personality & identity profile",
+      "10 AI reply suggestions per day",
+      "20 Talk to Twin messages per day",
+      "Unlimited memories & personality profile",
       "Likeness photo collection",
       "Public profile link",
-      "Receive license requests",
+      "Receive & respond to license requests",
       "Keep 70% of every licensing deal",
       "Full data ownership — always",
+    ],
+    locked: [
+      "Reel Creator",
+      "Voice cloning",
+      "Marketplace listing",
+      "Writing style AI analysis",
     ],
     cta: "Claim My Twin — Free",
     href: "/login",
@@ -100,20 +106,22 @@ const PRICING = [
   },
   {
     name: "Pro",
-    price: "$9",
+    price: "R499",
     period: "per month",
     description: "Unlock earning, creation, and your full digital self.",
     badge: "Most Popular",
     features: [
-      "Unlimited AI replies",
-      "Marketplace listing — get discovered by brands",
+      "100 AI reply suggestions per day",
+      "200 Talk to Twin messages per day",
+      "50 Reel scripts & captions per day",
+      "Marketplace listing — get found by brands",
       "Keep 80% of every licensing deal",
       "Voice cloning — your exact voice",
-      "Reel Creator — scripts & captions",
-      "Writing style analysis",
+      "AI writing style analysis",
       "Developer API access",
       "Full data ownership — always",
     ],
+    locked: [],
     cta: "Start Pro — 7 Days Free",
     href: "/login",
     highlight: true,
@@ -122,7 +130,7 @@ const PRICING = [
 
 const TAG_COLORS: Record<string, string> = {
   green:  "bg-green-50 text-green-700 border-green-200",
-  purple: "bg-purple-50 text-purple-700 border-purple-200",
+  purple: "bg-purple-100 text-purple-700 border-purple-300 font-bold",
   indigo: "bg-indigo-50 text-indigo-700 border-indigo-200",
 };
 
@@ -648,6 +656,12 @@ export default async function Home() {
                     <li key={f} className={`flex items-start gap-3 text-sm ${plan.highlight ? "text-indigo-100" : "text-slate-600"}`}>
                       <span className={`shrink-0 font-bold mt-0.5 ${plan.highlight ? "text-white" : "text-indigo-600"}`}>✓</span>
                       {f}
+                    </li>
+                  ))}
+                  {plan.locked.map((f) => (
+                    <li key={f} className={`flex items-start gap-3 text-sm ${plan.highlight ? "text-indigo-300/60" : "text-slate-400"}`}>
+                      <span className="shrink-0 mt-0.5">✗</span>
+                      <span className="line-through">{f}</span>
                     </li>
                   ))}
                 </ul>

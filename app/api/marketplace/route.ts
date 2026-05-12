@@ -17,6 +17,7 @@ export async function GET(req: Request) {
   const usage    = searchParams.get("usage") ?? "";
   const location = searchParams.get("location") ?? "";
   const maxPrice = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : null;
+  const verified = searchParams.get("verified") === "1";
 
   const twins = await db.twin.findMany({
     where: { name: { not: null }, marketplaceVisible: true },
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
       name:               true,
       personality:        true,
       licensePermissions: true,
-      user:               { select: { publicSlug: true } },
+      user:               { select: { publicSlug: true, verificationStatus: true } },
       reviews:            { select: { rating: true } },
     },
   });
@@ -61,18 +62,19 @@ export async function GET(req: Request) {
         : null;
 
       return {
-        id:           twin.id,
-        name:         twin.name as string,
-        profession:   (personality?.profession  as string | null) ?? null,
-        location:     (personality?.location    as string | null) ?? null,
-        tone:         (personality?.tone        as string[])      ?? [],
-        values:       (personality?.values      as string[])      ?? [],
-        photoUrl:     photoByUser[twin.userId]  ?? null,
-        licenses:     enabledLicenses,
+        id:                 twin.id,
+        name:               twin.name as string,
+        profession:         (personality?.profession  as string | null) ?? null,
+        location:           (personality?.location    as string | null) ?? null,
+        tone:               (personality?.tone        as string[])      ?? [],
+        values:             (personality?.values      as string[])      ?? [],
+        photoUrl:           photoByUser[twin.userId]  ?? null,
+        licenses:           enabledLicenses,
         startingPrice,
-        slug:         twin.user.publicSlug ?? null,
+        slug:               twin.user.publicSlug ?? null,
         avgRating,
         reviewCount,
+        verificationStatus: twin.user.verificationStatus,
       };
     })
     // Only show twins with at least one enabled license
@@ -82,6 +84,7 @@ export async function GET(req: Request) {
       if (usage    && !l.licenses.some((lic) => lic.id === usage))                         return false;
       if (location && !l.location?.toLowerCase().includes(location.toLowerCase()))          return false;
       if (maxPrice !== null && l.startingPrice !== null && l.startingPrice > maxPrice)      return false;
+      if (verified && l.verificationStatus !== "verified")                                 return false;
       return true;
     });
 

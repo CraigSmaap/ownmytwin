@@ -79,10 +79,12 @@ interface MyRequest {
   agreedPrice:  number;
   paidAt:       string | null;
   twin: {
+    id:   string;
     name: string | null;
     slug: string | null;
   } | null;
-  review: { id: string; rating: number; comment: string | null } | null;
+  review:        { id: string; rating: number; comment: string | null } | null;
+  showcasePost:  { id: string } | null;
 }
 
 export default function MyRequestsPage() {
@@ -96,8 +98,15 @@ export default function MyRequestsPage() {
   const [reviewingId,   setReviewingId]   = useState<string | null>(null);
   const [reviewRating,  setReviewRating]  = useState(0);
   const [reviewComment, setReviewComment] = useState("");
-  const [reviewSaving,  setReviewSaving]  = useState(false);
-  const [toast,         setToast]         = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [reviewSaving,      setReviewSaving]      = useState(false);
+  const [toast,             setToast]             = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [showcasingId,      setShowcasingId]      = useState<string | null>(null);
+  const [showcaseTitle,     setShowcaseTitle]     = useState("");
+  const [showcaseDesc,      setShowcaseDesc]      = useState("");
+  const [showcaseMediaType, setShowcaseMediaType] = useState<"text" | "embed" | "image">("text");
+  const [showcaseEmbedUrl,  setShowcaseEmbedUrl]  = useState("");
+  const [showcaseFile,      setShowcaseFile]      = useState<File | null>(null);
+  const [showcaseSaving,    setShowcaseSaving]    = useState(false);
 
   useEffect(() => {
     const paid      = searchParams.get("paid");
@@ -126,6 +135,55 @@ export default function MyRequestsPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  function resetShowcaseForm() {
+    setShowcasingId(null);
+    setShowcaseTitle("");
+    setShowcaseDesc("");
+    setShowcaseMediaType("text");
+    setShowcaseEmbedUrl("");
+    setShowcaseFile(null);
+  }
+
+  async function submitShowcase(req: MyRequest) {
+    if (!showcaseTitle.trim() || showcaseSaving || !req.twin?.id) return;
+    setShowcaseSaving(true);
+
+    let res: Response;
+    if (showcaseMediaType === "image" && showcaseFile) {
+      const fd = new FormData();
+      fd.append("title",            showcaseTitle.trim());
+      fd.append("description",      showcaseDesc.trim());
+      fd.append("mediaType",        "image");
+      fd.append("twinId",           req.twin.id);
+      fd.append("licenseRequestId", req.id);
+      fd.append("image",            showcaseFile);
+      res = await fetch("/api/showcase", { method: "POST", body: fd });
+    } else {
+      res = await fetch("/api/showcase", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          title:            showcaseTitle.trim(),
+          description:      showcaseDesc.trim(),
+          mediaType:        showcaseMediaType === "embed" ? "embed" : "text",
+          twinId:           req.twin.id,
+          licenseRequestId: req.id,
+          mediaUrl:         showcaseMediaType === "embed" ? showcaseEmbedUrl.trim() : undefined,
+        }),
+      });
+    }
+
+    if (res.ok) {
+      const { post } = await res.json();
+      setRequests((prev) => prev.map((r) => r.id === req.id ? { ...r, showcasePost: { id: post.id } } : r));
+      resetShowcaseForm();
+      setToast({ msg: "Post published to Showcase!", type: "success" });
+    } else {
+      setToast({ msg: "Failed to publish. Please try again.", type: "error" });
+    }
+    setShowcaseSaving(false);
+  }
 
   async function submitReview(requestId: string) {
     if (reviewRating === 0 || reviewSaving) return;
@@ -417,6 +475,92 @@ export default function MyRequestsPage() {
                             className="text-xs text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1.5"
                           >
                             ★ Leave a review
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Showcase CTA — approved requests only */}
+                    {status === "approved" && (
+                      <div className="mt-4 pt-4 border-t border-slate-800">
+                        {req.showcasePost ? (
+                          <Link
+                            href={`/showcase/${req.showcasePost.id}`}
+                            target="_blank"
+                            className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                          >
+                            🎬 View on Showcase →
+                          </Link>
+                        ) : showcasingId === req.id ? (
+                          <div className="space-y-3">
+                            <p className="text-xs font-semibold text-white">Share your work on Showcase</p>
+                            <input
+                              value={showcaseTitle}
+                              onChange={(e) => setShowcaseTitle(e.target.value)}
+                              placeholder="Post title *"
+                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                            />
+                            <textarea
+                              value={showcaseDesc}
+                              onChange={(e) => setShowcaseDesc(e.target.value)}
+                              placeholder="Describe your project..."
+                              rows={2}
+                              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none text-sm"
+                            />
+                            <div className="flex gap-1">
+                              {(["text", "embed", "image"] as const).map((type) => (
+                                <button
+                                  key={type}
+                                  type="button"
+                                  onClick={() => setShowcaseMediaType(type)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                    showcaseMediaType === type
+                                      ? "bg-indigo-600 text-white border-indigo-500"
+                                      : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white"
+                                  }`}
+                                >
+                                  {type === "text" ? "📝 Text" : type === "embed" ? "🔗 Embed" : "🖼️ Image"}
+                                </button>
+                              ))}
+                            </div>
+                            {showcaseMediaType === "embed" && (
+                              <input
+                                value={showcaseEmbedUrl}
+                                onChange={(e) => setShowcaseEmbedUrl(e.target.value)}
+                                placeholder="YouTube / Vimeo URL"
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm"
+                              />
+                            )}
+                            {showcaseMediaType === "image" && (
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setShowcaseFile(e.target.files?.[0] ?? null)}
+                                className="text-xs text-slate-400 file:mr-3 file:bg-slate-700 file:text-slate-300 file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-xs cursor-pointer"
+                              />
+                            )}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={resetShowcaseForm}
+                                className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-300 border border-slate-700 rounded-lg transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => submitShowcase(req)}
+                                disabled={!showcaseTitle.trim() || showcaseSaving}
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-semibold py-1.5 rounded-lg transition-colors"
+                              >
+                                {showcaseSaving ? "Publishing..." : "🚀 Publish to Showcase"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { resetShowcaseForm(); setShowcasingId(req.id); }}
+                            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5"
+                          >
+                            🚀 Share your work on Showcase
                           </button>
                         )}
                       </div>

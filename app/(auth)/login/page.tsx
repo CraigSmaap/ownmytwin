@@ -30,7 +30,7 @@ function LoginContent() {
     e.preventDefault();
     setLoading(true);
     // NextAuth redirects to /dashboard on success, or back to /login?error=… on failure
-    await signIn("credentials", { email, password, callbackUrl: "/dashboard" });
+    await signIn("credentials", { email, password, callbackUrl: "/showcase" });
     // Only reaches here if the redirect was somehow prevented
     setLoading(false);
   }
@@ -52,7 +52,7 @@ function LoginContent() {
 
             {/* Google */}
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl: "/showcase" })}
               className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-xl font-medium text-sm transition-colors shadow-sm"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">

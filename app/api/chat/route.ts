@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, modelForPlan, cachedSystem } from "@/lib/anthropic";
 import { getRelevantMemories } from "@/lib/memory-search";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -25,16 +26,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Set up your Twin first" }, { status: 400 });
   }
 
-  if (currentUser?.plan !== "pro") {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    const monthlyCount = await db.message.count({
-      where: { twinId: twin.id, role: "assistant", createdAt: { gte: monthStart } },
-    });
-    if (monthlyCount >= 10) {
-      return NextResponse.json({ error: "Monthly reply limit reached. Upgrade to Pro for unlimited replies." }, { status: 429 });
-    }
+  const rate = await checkRateLimit(session.user.id, "chat", currentUser?.plan ?? "free");
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: `Daily chat limit reached (${rate.limit}/day). ${currentUser?.plan === "pro" ? "Try again tomorrow." : "Upgrade to Pro for higher limits."}` },
+      { status: 429 },
+    );
   }
 
   const lastUserMsg = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
@@ -50,13 +47,13 @@ export async function POST(req: Request) {
     "\n\nYou are now in a direct conversation with the person you are twinning. Reply naturally as them — in their voice, their style, their personality. Keep responses conversational.";
 
   const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+    model: modelForPlan(currentUser?.plan),
     max_tokens: 1024,
-    system: systemPrompt,
+    system: cachedSystem(systemPrompt),
     messages,
   });
 
   const reply = response.content[0].type === "text" ? response.content[0].text : "";
 
-  return NextResponse.json({ reply });
+  return NextResponse.json({ reply, remaining: rate.remaining, limit: rate.limit });
 }

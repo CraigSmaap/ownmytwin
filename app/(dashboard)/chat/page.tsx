@@ -222,11 +222,6 @@ export default function ChatPage() {
               className="h-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
               style={{ width: `${completeness.score}%` }}
             />
-            {/* Threshold marker */}
-            <div
-              className="h-2.5 w-0.5 bg-white/30 absolute"
-              style={{ marginLeft: `${UNLOCK_THRESHOLD}%`, marginTop: "-10px" }}
-            />
           </div>
 
           {/* Missing items */}
@@ -242,10 +237,6 @@ export default function ChatPage() {
               </div>
             </div>
           )}
-
-          {completeness.items.filter((i) => i.done).map((item) => (
-            <div key={item.label} className="hidden" />
-          ))}
         </div>
 
         <Link
@@ -255,7 +246,7 @@ export default function ChatPage() {
           🤖 Continue Training My Twin
         </Link>
 
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-slate-500">
           {UNLOCK_THRESHOLD - completeness.score}% more needed to unlock
         </p>
       </div>
@@ -291,7 +282,7 @@ export default function ChatPage() {
         {messages.length > 0 && (
           <button
             onClick={() => { setMessages([]); setError(""); }}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800"
+            className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-800"
           >
             Clear chat
           </button>
@@ -305,7 +296,7 @@ export default function ChatPage() {
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-3xl mb-4">🪞</div>
             <h2 className="text-white font-semibold mb-1">Say something to your Twin</h2>
-            <p className="text-slate-500 text-sm max-w-xs">
+            <p className="text-slate-400 text-sm max-w-xs">
               Type anything — your Twin will reply exactly as you would. Great for testing how it sounds.
             </p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
@@ -317,7 +308,7 @@ export default function ChatPage() {
                 <button
                   key={prompt}
                   onClick={() => { setInput(prompt); inputRef.current?.focus(); }}
-                  className="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-slate-200 px-3 py-2 rounded-xl transition-colors"
+                  className="text-xs bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 px-3 py-2 rounded-xl transition-colors"
                 >
                   {prompt}
                 </button>
@@ -356,8 +347,8 @@ export default function ChatPage() {
                       disabled={savingIdx === i || savedIdx.has(i)}
                       className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
                         savedIdx.has(i)
-                          ? "bg-green-900/30 text-green-400 border-green-800/50"
-                          : "bg-slate-800/50 text-slate-500 border-slate-700 hover:text-slate-300 hover:border-slate-600"
+                          ? "bg-green-900/40 text-green-400 border-green-800/50"
+                          : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600"
                       }`}
                     >
                       {savedIdx.has(i) ? "✓ Saved" : savingIdx === i ? "Saving..." : "💾 Save as memory"}
@@ -367,7 +358,7 @@ export default function ChatPage() {
                     ) : correctingIdx !== i && (
                       <button
                         onClick={() => { setCorrectingIdx(i); setCorrectionText(""); }}
-                        className="text-xs px-2.5 py-1 rounded-lg border bg-slate-800/50 text-slate-500 border-slate-700 hover:text-teal-400 hover:border-teal-800/50 transition-all"
+                        className="text-xs px-2.5 py-1 rounded-lg border bg-slate-800 text-slate-400 border-slate-700 hover:text-teal-400 hover:border-teal-700 transition-all"
                       >
                         ✏️ Correct this
                       </button>
@@ -376,15 +367,15 @@ export default function ChatPage() {
 
                   {/* Correction form */}
                   {correctingIdx === i && (
-                    <div className="space-y-2 bg-slate-800/40 rounded-xl p-3 border border-teal-800/30">
-                      <p className="text-xs text-slate-400">What would you actually say?</p>
+                    <div className="space-y-2 bg-slate-800/50 rounded-xl p-3 border border-teal-700/50">
+                      <p className="text-xs text-slate-500">What would you actually say?</p>
                       <textarea
                         value={correctionText}
                         onChange={(e) => setCorrectionText(e.target.value)}
                         placeholder="Type your preferred reply..."
                         rows={3}
                         autoFocus
-                        className="w-full bg-slate-800 border border-teal-700/50 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm leading-relaxed"
+                        className="w-full bg-slate-800 border border-teal-700 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none text-sm leading-relaxed"
                       />
                       <div className="flex gap-2">
                         <button
@@ -407,7 +398,7 @@ export default function ChatPage() {
                   {/* Tone adjustment — last assistant message only */}
                   {i === lastAssistantIdx && !loading && (
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs text-slate-600">Adjust:</span>
+                      <span className="text-xs text-slate-500">Adjust:</span>
                       {TONE_TWEAKS.map((t) => (
                         <button
                           key={t.key}
@@ -415,8 +406,8 @@ export default function ChatPage() {
                           disabled={toneLoading !== null}
                           className={`text-xs px-2.5 py-1 rounded-lg border transition-all disabled:opacity-50 ${
                             toneLoading === t.key
-                              ? "bg-indigo-900/50 text-indigo-300 border-indigo-700"
-                              : "bg-slate-800/50 text-slate-500 border-slate-700 hover:text-slate-300 hover:border-slate-600"
+                              ? "bg-indigo-900/40 text-indigo-300 border-indigo-700/50"
+                              : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600"
                           }`}
                         >
                           {toneLoading === t.key ? (
@@ -458,7 +449,7 @@ export default function ChatPage() {
 
         {error && (
           <div className="flex justify-center">
-            <p className="text-xs text-red-400 bg-red-900/20 border border-red-800/40 rounded-xl px-4 py-2">
+            <p className="text-xs text-red-400 bg-red-900/40 border border-red-800/50 rounded-xl px-4 py-2">
               {error}
             </p>
           </div>
@@ -495,7 +486,7 @@ export default function ChatPage() {
             </svg>
           </button>
         </div>
-        <p className="text-xs text-slate-700 mt-2 text-center">Enter to send · Shift+Enter for new line · Not saved</p>
+        <p className="text-xs text-slate-600 mt-2 text-center">Enter to send · Shift+Enter for new line · Not saved</p>
       </div>
     </div>
   );

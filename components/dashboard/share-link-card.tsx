@@ -25,10 +25,7 @@ export function ShareLinkCard({ slug }: { slug: string | null }) {
         <p className="text-xs text-slate-400 leading-relaxed mb-3">
           Create a shareable link for your bio. Buyers and brands can find and license you directly.
         </p>
-        <Link
-          href="/settings"
-          className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
-        >
+        <Link href="/settings" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
           Set up your profile link →
         </Link>
       </div>

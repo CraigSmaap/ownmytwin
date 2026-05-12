@@ -2,6 +2,7 @@ import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/db";
+
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 
@@ -11,18 +12,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { image: true, onboardingComplete: true, emailVerified: true, role: true, accountType: true },
+    select: { name: true, image: true, onboardingComplete: true, emailVerified: true, role: true, accountType: true, verificationStatus: true },
   });
 
   if (!user?.emailVerified)                          redirect("/verify-email");
   if (!user?.onboardingComplete && user?.role !== "admin") redirect("/onboarding");
 
-  const photoUrl    = user?.image ?? null;
-  const userName    = session.user.name ?? session.user.email ?? "";
-  const isAdmin     = user?.role === "admin";
-  const accountType = user?.accountType ?? "talent";
+  const photoUrl           = user?.image ?? null;
+  const userName           = user?.name ?? session.user.name ?? session.user.email ?? "";
+  const isAdmin            = user?.role === "admin";
+  const accountType        = user?.accountType ?? "talent";
+  const verificationStatus = user?.verificationStatus ?? "unverified";
 
-  // Pending license request count for nav badge
   const twin = await db.twin.findUnique({
     where:  { userId: session.user.id },
     select: { id: true },
@@ -32,20 +33,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
     : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex">
-      {/* Mobile top bar + drawer */}
+    <div
+      className="min-h-screen text-white flex"
+      style={{
+        backgroundImage: `linear-gradient(rgba(2,6,23,0.72),rgba(2,6,23,0.72)),url('/dashboard-background.png')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <MobileNav
         userName={userName}
         photoUrl={photoUrl}
         isAdmin={isAdmin}
         accountType={accountType}
         pendingRequests={pendingRequests}
+        verificationStatus={verificationStatus}
       />
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0">
         <div className="p-4 border-b border-slate-800">
-          <div className="bg-white rounded-xl p-3 mb-3">
+          <div className="mb-3 px-1">
             <Image
               src="/ownmytwin-logo.png"
               alt="OwnMyTwin"
@@ -67,7 +76,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
 
-        <SidebarNav isAdmin={isAdmin} accountType={accountType} pendingRequests={pendingRequests} />
+        <SidebarNav isAdmin={isAdmin} accountType={accountType} pendingRequests={pendingRequests} verificationStatus={verificationStatus} />
 
         <div className="p-4 border-t border-slate-800">
           <form
@@ -86,7 +95,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
 
-      {/* Main content — offset on mobile for top bar */}
+      {/* Main content */}
       <main className="flex-1 overflow-auto pt-14 md:pt-0">
         <div className="p-4 sm:p-6 md:p-8">
           {children}

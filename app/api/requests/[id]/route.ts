@@ -10,8 +10,9 @@ export async function PATCH(
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id }     = await params;
-  const { status } = await req.json() as { status: "approved" | "rejected" };
+  const { id } = await params;
+  const body   = await req.json() as { status: "approved" | "rejected"; responseNote?: string; agreedPrice?: number };
+  const { status, responseNote, agreedPrice } = body;
 
   if (!["approved", "rejected"].includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
@@ -29,7 +30,12 @@ export async function PATCH(
 
   const updated = await db.licenseRequest.update({
     where: { id },
-    data:  { status },
+    data:  {
+      status,
+      respondedAt:  new Date(),
+      responseNote: responseNote?.trim() || null,
+      ...(status === "approved" && agreedPrice != null ? { agreedPrice } : {}),
+    },
   });
 
   // Notify the buyer — fire and forget
