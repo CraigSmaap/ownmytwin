@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function RegisterPage() {
+function RegisterContent() {
+  const searchParams = useSearchParams();
   const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
+
+  const ref = searchParams.get("ref");
+  useEffect(() => {
+    if (ref) localStorage.setItem("pending_referral", ref);
+  }, [ref]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -143,5 +150,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterContent />
+    </Suspense>
   );
 }

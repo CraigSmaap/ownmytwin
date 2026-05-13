@@ -95,7 +95,10 @@ function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="relative min-h-screen">
+      <Image src="/background2.png" alt="" fill className="object-cover object-center" priority />
+      <div className="absolute inset-0 bg-white/50" />
+      <div className="relative z-10">
 
       {/* Top bar */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
@@ -188,6 +191,7 @@ function SearchContent() {
             </Link>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -314,7 +314,7 @@ export default function TwinPage() {
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">{cat.icon}</span>
                   <span className="text-xs font-medium text-slate-300">{cat.label}</span>
-                  <span className="text-xs text-slate-600">— {cat.hint}</span>
+                  <span className="hidden sm:inline text-xs text-slate-600">— {cat.hint}</span>
                 </div>
                 <span className={`text-xs font-bold ${cat.score === cat.max ? "text-green-400" : tier.text}`}>
                   {cat.score}/{cat.max}

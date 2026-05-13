@@ -7,3 +7,12 @@
     @apply w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm transition-colors;
   }
 }
+
+/* Prevent iOS Safari from zooming into inputs (requires font-size >= 16px) */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

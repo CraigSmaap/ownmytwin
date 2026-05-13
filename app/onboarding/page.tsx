@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { VoiceRecorder } from "@/components/voice/voice-recorder";
 import { CameraCapture } from "@/components/camera-capture";
@@ -26,6 +27,7 @@ const INDUSTRIES = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { update } = useSession();
 
   // Age + POPIA consent gate (shown first, before account type)
   const [ageGatePassed,  setAgeGatePassed]  = useState(false);
@@ -172,6 +174,7 @@ export default function OnboardingPage() {
         onboardingComplete: true,
       }),
     });
+    await update({ accountType: "buyer" });
     router.push("/dashboard");
   }
 

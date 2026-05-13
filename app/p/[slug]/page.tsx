@@ -82,14 +82,32 @@ export async function generateMetadata(
 
   const twin        = user.twin;
   const personality = twin.personality as PersonalityData | null;
-  const title       = `${twin.name ?? "AI Twin"} | OwnMyTwin`;
-  const description = twin.bio ?? `${personality?.profession ?? "AI Twin"} — available to license on OwnMyTwin`;
+  const name        = twin.name ?? "AI Twin";
+  const title       = `${name} — AI Twin`;
+  const description = twin.bio
+    ?? `${personality?.profession ? `${personality.profession} · ` : ""}License ${name}'s AI twin on OwnMyTwin`;
+  const photoUrl    = user.photos[0]?.url ?? null;
+
+  const images = photoUrl
+    ? [{ url: photoUrl, width: 400, height: 400, alt: name }]
+    : [{ url: "/ownmytwin-logo.png", width: 1200, height: 630, alt: "OwnMyTwin" }];
 
   return {
     title,
     description,
-    openGraph: { title, description, siteName: "OwnMyTwin" },
-    twitter:   { card: "summary", title, description },
+    openGraph: {
+      type:        "profile",
+      title,
+      description,
+      siteName:    "OwnMyTwin",
+      images,
+    },
+    twitter: {
+      card:        photoUrl ? "summary" : "summary_large_image",
+      title,
+      description,
+      images:      images.map((i) => i.url),
+    },
   };
 }
 

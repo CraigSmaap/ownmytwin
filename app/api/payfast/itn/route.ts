@@ -57,6 +57,31 @@ export async function POST(req: NextRequest) {
       data:  { plan: "pro", planExpiresAt },
     });
     console.log(`[PayFast ITN] Upgraded user ${userId} to Pro until ${planExpiresAt.toISOString()}`);
+
+    // Referral reward — only fires once per referred user
+    const paidUser = await db.user.findUnique({
+      where:  { id: userId },
+      select: { referredByCode: true, referralRewardGiven: true },
+    });
+    if (paidUser?.referredByCode && !paidUser.referralRewardGiven) {
+      const referrer = await db.user.findFirst({
+        where:  { referralCode: paidUser.referredByCode, referralRewardMonths: { lt: 6 } },
+        select: { id: true, planExpiresAt: true },
+      });
+      if (referrer) {
+        const base       = referrer.planExpiresAt && referrer.planExpiresAt > new Date() ? referrer.planExpiresAt : new Date();
+        const newExpiry  = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000);
+        await db.user.update({
+          where: { id: referrer.id },
+          data:  { plan: "pro", planExpiresAt: newExpiry, referralRewardMonths: { increment: 1 } },
+        });
+        await db.user.update({
+          where: { id: userId },
+          data:  { referralRewardGiven: true },
+        });
+        console.log(`[PayFast ITN] Referral reward granted — referrer ${referrer.id} extended to ${newExpiry.toISOString()}`);
+      }
+    }
   } else if (status === "CANCELLED") {
     await db.user.update({
       where: { id: userId },

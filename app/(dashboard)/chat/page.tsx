@@ -268,7 +268,7 @@ export default function ChatPage() {
 
   // ── Chat UI ───────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-[calc(100vh-2rem)] max-w-3xl mx-auto -mt-4 sm:-mt-6">
+    <div className="flex flex-col h-[calc(100dvh-4.5rem)] md:h-[calc(100vh-2rem)] max-w-3xl mx-auto -mt-4 sm:-mt-6">
 
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between py-4 sm:py-5 border-b border-slate-800">
@@ -486,7 +486,7 @@ export default function ChatPage() {
             </svg>
           </button>
         </div>
-        <p className="text-xs text-slate-600 mt-2 text-center">Enter to send · Shift+Enter for new line · Not saved</p>
+        <p className="hidden sm:block text-xs text-slate-600 mt-2 text-center">Enter to send · Shift+Enter for new line · Not saved</p>
       </div>
     </div>
   );

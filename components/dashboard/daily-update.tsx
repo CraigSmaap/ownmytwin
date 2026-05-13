@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Tone = "serious" | "funny" | "inspirational";
 type Step = "idle" | "journal" | "generating" | "preview" | "done";
@@ -131,9 +132,9 @@ export function DailyUpdate({ twinId }: Props) {
           {published ? "Your post is live. Every update makes your Twin sharper." : error || "Your update was saved as a memory."}
         </p>
         {published && (
-          <a href="/showcase" className="inline-block text-xs text-indigo-400 hover:text-indigo-300 mt-2 transition-colors">
+          <Link href="/showcase" className="inline-block text-xs text-indigo-400 hover:text-indigo-300 mt-2 transition-colors">
             View Showcase →
-          </a>
+          </Link>
         )}
         <button onClick={reset} className="block mx-auto text-xs text-slate-600 hover:text-slate-400 mt-3 transition-colors">
           Write another update

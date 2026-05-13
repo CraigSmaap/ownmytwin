@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm *)",
+      "Bash(npx prisma *)",
+      "PowerShell(Get-Process *)",
+      "Bash(npx tsc *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(npm run *)",
+      "Bash(findstr review *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" -Recurse -Name)",
+      "PowerShell(head *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" -Recurse -Filter \"page.tsx\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "PowerShell(taskkill *)",
+      "Bash(npx next *)",
+      "PowerShell(Rename-Item *)",
+      "WebFetch(domain:api.dicebear.com)",
+      "WebFetch(domain:www.pexels.com)",
+      "WebFetch(domain:images.pexels.com)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(Select-String -Pattern \"icon|favicon|apple|manifest|og|opengraph\")"
+    ]
+  }
+}

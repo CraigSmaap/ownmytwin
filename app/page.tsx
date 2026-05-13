@@ -239,7 +239,7 @@ export default async function Home() {
       <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative pt-40 pb-28 px-6 overflow-hidden">
+      <section className="relative pt-24 sm:pt-40 pb-16 sm:pb-28 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 bg-white/50" />
 
         <div className="relative max-w-6xl mx-auto">
@@ -253,7 +253,7 @@ export default async function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-center text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.08] mb-6 text-slate-900 max-w-5xl mx-auto">
+          <h1 className="text-center text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.08] mb-6 text-slate-900 max-w-5xl mx-auto">
             Your audience never stops.
             <br />
             <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -262,7 +262,7 @@ export default async function Home() {
           </h1>
 
           {/* Subheadline */}
-          <p className="text-center text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+          <p className="text-center text-base sm:text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed">
             Reply to every DM in your exact voice. License your likeness to brands.
             <strong className="text-slate-900"> Earn while you&apos;re offline.</strong>{" "}
             SA&apos;s biggest creators are building their Twins right now.
@@ -272,13 +272,13 @@ export default async function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <Link
               href="/login"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-12 py-5 rounded-2xl text-xl transition-all shadow-2xl shadow-indigo-300 hover:shadow-indigo-400 hover:scale-[1.02] active:scale-[0.98]"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 sm:px-12 py-4 sm:py-5 rounded-2xl text-lg sm:text-xl transition-all shadow-2xl shadow-indigo-300 hover:shadow-indigo-400 hover:scale-[1.02] active:scale-[0.98] text-center"
             >
               Claim My Twin — Free
             </Link>
             <a
               href="#how-it-works"
-              className="border-2 border-slate-300 hover:border-slate-400 text-slate-600 hover:text-slate-900 font-semibold px-10 py-5 rounded-2xl text-lg transition-colors"
+              className="border-2 border-slate-300 hover:border-slate-400 text-slate-600 hover:text-slate-900 font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg transition-colors text-center"
             >
               See how it works ↓
             </a>

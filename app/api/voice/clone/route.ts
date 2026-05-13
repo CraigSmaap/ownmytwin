@@ -24,8 +24,7 @@ export async function POST() {
   if (!twin) return NextResponse.json({ error: "Set up your Twin first" }, { status: 400 });
   if (recordings.length < 3) return NextResponse.json({ error: "Record at least 3 voice samples first" }, { status: 400 });
 
-  const baseUrl = process.env.APP_URL ?? "http://localhost:3000";
-  const audioUrls = recordings.map((r) => `${baseUrl}${r.url}`);
+  const audioUrls = recordings.map((r) => r.url);
 
   const voiceId = await createVoiceClone(twin.name ?? "My Twin", audioUrls);
 

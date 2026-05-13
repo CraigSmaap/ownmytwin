@@ -5,10 +5,48 @@ import { Providers } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const BASE_URL = process.env.NEXTAUTH_URL ?? "https://ownmytwin.com";
+
+const TITLE       = "OwnMyTwin — Own Your Digital Identity";
+const DESCRIPTION = "Create your AI twin, own your voice and likeness, and earn from licensing deals. South Africa's digital identity marketplace for creators.";
+
 export const metadata: Metadata = {
-  title: "OwnMyTwin — Your Digital Identity",
-  description:
-    "Create your digital twin — own your voice, your likeness, your memories. Build it. Own it. Profit from it.",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default:  TITLE,
+    template: "%s | OwnMyTwin",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "AI twin", "digital identity", "voice cloning", "likeness licensing",
+    "South Africa creator", "AI avatar", "digital human marketplace",
+  ],
+  authors: [{ name: "OwnMyTwin" }],
+  creator: "OwnMyTwin",
+  openGraph: {
+    type:        "website",
+    locale:      "en_ZA",
+    url:         BASE_URL,
+    siteName:    "OwnMyTwin",
+    title:       TITLE,
+    description: DESCRIPTION,
+    images: [{
+      url:    "/ownmytwin-logo.png",
+      width:  1200,
+      height: 630,
+      alt:    "OwnMyTwin — Own Your Digital Identity",
+    }],
+  },
+  twitter: {
+    card:        "summary_large_image",
+    title:       TITLE,
+    description: DESCRIPTION,
+    images:      ["/ownmytwin-logo.png"],
+  },
+  robots: {
+    index:  true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

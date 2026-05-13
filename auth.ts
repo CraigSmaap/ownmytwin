@@ -65,6 +65,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (trigger === "update" && session?.twoFactorVerified === true) {
         token.twoFactorVerified = true;
       }
+      if (trigger === "update" && session?.accountType) {
+        token.accountType = session.accountType;
+      }
       return token;
     },
     session({ session, token }) {

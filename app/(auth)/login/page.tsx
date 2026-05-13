@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -25,6 +25,11 @@ function LoginContent() {
   const [loading,  setLoading]  = useState(false);
 
   const errorMessage = urlError ? (AUTH_ERRORS[urlError] ?? AUTH_ERRORS.Default) : null;
+
+  const ref = searchParams.get("ref");
+  useEffect(() => {
+    if (ref) localStorage.setItem("pending_referral", ref);
+  }, [ref]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

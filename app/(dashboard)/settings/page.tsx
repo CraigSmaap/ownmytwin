@@ -38,6 +38,13 @@ function SettingsContent() {
   const [profileError,       setProfileError]       = useState("");
   const [copied,             setCopied]             = useState(false);
 
+  // Referral
+  const [referralCode,        setReferralCode]        = useState("");
+  const [referralUrl,         setReferralUrl]         = useState("");
+  const [successfulReferrals, setSuccessfulReferrals] = useState(0);
+  const [rewardMonths,        setRewardMonths]        = useState(0);
+  const [copiedReferral,      setCopiedReferral]      = useState(false);
+
   // Buyer profile
   const [buyerCompany,      setBuyerCompany]      = useState("");
   const [buyerIndustry,     setBuyerIndustry]     = useState("");
@@ -49,7 +56,14 @@ function SettingsContent() {
     Promise.all([
       fetch("/api/user").then((r) => r.json()),
       fetch("/api/twin").then((r) => r.json()),
-    ]).then(([{ user }, { twin }]) => {
+      fetch("/api/referral").then((r) => r.json()),
+    ]).then(([{ user }, { twin }, referral]) => {
+      if (referral?.code) {
+        setReferralCode(referral.code);
+        setReferralUrl(referral.referralUrl);
+        setSuccessfulReferrals(referral.successfulReferrals ?? 0);
+        setRewardMonths(referral.rewardMonths ?? 0);
+      }
       if (user) {
         setName(user.name ?? "");
         setEmail(user.email ?? "");
@@ -182,6 +196,14 @@ function SettingsContent() {
     await fetch("/api/user/delete", { method: "DELETE" });
     await signOut({ redirect: false });
     router.push("/");
+  }
+
+  function handleCopyReferralLink() {
+    if (!referralUrl) return;
+    navigator.clipboard.writeText(referralUrl).then(() => {
+      setCopiedReferral(true);
+      setTimeout(() => setCopiedReferral(false), 2000);
+    });
   }
 
   function handleCopyLink() {
@@ -340,6 +362,58 @@ function SettingsContent() {
           </div>
         )}
       </div>}
+
+      {/* Referral */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Refer & Earn</h2>
+          <p className="text-xs text-slate-600 mt-1">
+            Earn 1 month of Pro free for every friend who signs up and pays. Capped at 6 months.
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-white">{successfulReferrals}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Successful referrals</p>
+          </div>
+          <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center">
+            <p className="text-2xl font-bold text-indigo-400">{rewardMonths}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Free months earned</p>
+          </div>
+        </div>
+
+        {/* Referral link */}
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Your referral link</label>
+          <div className="flex gap-2">
+            <div className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-300 text-sm truncate min-w-0">
+              {referralUrl || "Generating..."}
+            </div>
+            <button
+              onClick={handleCopyReferralLink}
+              disabled={!referralCode}
+              className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all disabled:opacity-40 ${
+                copiedReferral
+                  ? "bg-green-900/30 text-green-400 border-green-800/50"
+                  : "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300"
+              }`}
+            >
+              {copiedReferral ? "✓ Copied!" : "Copy"}
+            </button>
+          </div>
+          <p className="text-xs text-slate-700 mt-1.5">
+            Share this link. When someone signs up and pays their first month, you get a free month added automatically.
+          </p>
+        </div>
+
+        {rewardMonths >= 6 && (
+          <div className="bg-amber-900/20 border border-amber-800/40 rounded-xl px-4 py-3 text-xs text-amber-400">
+            You&apos;ve hit the 6-month cap — thank you for spreading the word!
+          </div>
+        )}
+      </div>
 
       {/* Account */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">

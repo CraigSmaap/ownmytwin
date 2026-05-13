@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
       marketplaceVisible: true,
       OR: [
         { systemPrompt: { not: null } },
-        { personality:  { not: null } },
         { bio:          { not: null } },
       ],
     },

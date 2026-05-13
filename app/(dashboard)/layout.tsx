@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
 import { auth, signOut } from "@/auth";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/db";
 
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { ReferralApplier } from "@/components/referral-applier";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -97,6 +103,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Main content */}
       <main className="flex-1 overflow-auto pt-14 md:pt-0">
+        <ReferralApplier />
         <div className="p-4 sm:p-6 md:p-8">
           {children}
         </div>
