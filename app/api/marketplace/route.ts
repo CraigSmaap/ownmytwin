@@ -29,6 +29,7 @@ export async function GET(req: Request) {
       licensePermissions: true,
       user:               { select: { publicSlug: true, verificationStatus: true } },
       reviews:            { select: { rating: true } },
+      licenseRequests:    { where: { paidAt: { not: null } }, select: { id: true, agreedPrice: true } },
     },
   });
 
@@ -61,6 +62,9 @@ export async function GET(req: Request) {
         ? Math.round((twin.reviews.reduce((s, r) => s + r.rating, 0) / reviewCount) * 10) / 10
         : null;
 
+      const hireCount    = twin.licenseRequests.length;
+      const totalEarned  = twin.licenseRequests.reduce((s, r) => s + r.agreedPrice, 0);
+
       return {
         id:                 twin.id,
         name:               twin.name as string,
@@ -74,6 +78,8 @@ export async function GET(req: Request) {
         slug:               twin.user.publicSlug ?? null,
         avgRating,
         reviewCount,
+        hireCount,
+        totalEarned,
         verificationStatus: twin.user.verificationStatus,
       };
     })

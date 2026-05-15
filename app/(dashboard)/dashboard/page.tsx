@@ -41,13 +41,18 @@ export default async function DashboardPage() {
 
   const [user, twin, photos, voiceRecordings] = await Promise.all([
     db.user.findUnique({ where: { id: userId }, select: { name: true, image: true, createdAt: true, onboardingComplete: true, publicSlug: true, accountType: true, buyerProfile: true, role: true } }),
-    db.twin.findUnique({ where: { userId }, include: { _count: { select: { memories: true, messages: true } } } }),
+    db.twin.findUnique({ where: { userId }, include: { _count: { select: { memories: true, messages: true } }, licenseRequests: { select: { agreedPrice: true, paidAt: true, status: true } } } }),
     db.likenessPhoto.count({ where: { userId } }),
     db.voiceRecording.count({ where: { userId } }),
   ]);
 
-  if (user?.role === "admin")            redirect("/admin");
-  if (user && !user.onboardingComplete) redirect("/onboarding");
+  const paidRequests    = twin?.licenseRequests.filter((r) => r.paidAt !== null) ?? [];
+  const pendingRequests = twin?.licenseRequests.filter((r) => r.status === "pending") ?? [];
+  const totalEarned     = paidRequests.reduce((s, r) => s + r.agreedPrice, 0);
+  const thisMonth       = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
+  const earnedThisMonth = paidRequests.filter((r) => r.paidAt! >= thisMonth).reduce((s, r) => s + r.agreedPrice, 0);
+
+  if (user && !user.onboardingComplete && user.role !== "admin") redirect("/onboarding");
 
   if (user?.accountType === "buyer") {
     const buyerRequests = await db.licenseRequest.findMany({
@@ -143,6 +148,30 @@ export default async function DashboardPage() {
         <StatCard label="Photos Uploaded"   value={photos}          icon="📸" color="pink"   href="/twin"     />
         <StatCard label="Voice Samples"     value={voiceRecordings} icon="🎙️" color="cyan"   href="/twin"     />
       </div>
+
+      {/* Earnings summary — only show once there's activity */}
+      {(totalEarned > 0 || pendingRequests.length > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link href="/requests" className="relative overflow-hidden bg-gradient-to-br from-green-500/10 to-slate-900 border border-green-800/40 rounded-2xl p-5 hover:border-green-700/60 transition-colors">
+            <p className="text-xs text-slate-500 mb-1">Total Earned</p>
+            <p className="text-3xl font-bold text-white">R{totalEarned.toLocaleString("en-ZA")}</p>
+            <p className="text-xs text-green-400 mt-1">{paidRequests.length} paid {paidRequests.length === 1 ? "license" : "licenses"}</p>
+            <span className="absolute top-4 right-4 text-2xl opacity-20">💰</span>
+          </Link>
+          <Link href="/requests" className="relative overflow-hidden bg-gradient-to-br from-indigo-500/10 to-slate-900 border border-indigo-800/40 rounded-2xl p-5 hover:border-indigo-700/60 transition-colors">
+            <p className="text-xs text-slate-500 mb-1">This Month</p>
+            <p className="text-3xl font-bold text-white">R{earnedThisMonth.toLocaleString("en-ZA")}</p>
+            <p className="text-xs text-indigo-400 mt-1">{new Date().toLocaleDateString("en-ZA", { month: "long", year: "numeric" })}</p>
+            <span className="absolute top-4 right-4 text-2xl opacity-20">📅</span>
+          </Link>
+          <Link href="/requests" className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 to-slate-900 border border-amber-800/40 rounded-2xl p-5 hover:border-amber-700/60 transition-colors">
+            <p className="text-xs text-slate-500 mb-1">Pending Requests</p>
+            <p className="text-3xl font-bold text-white">{pendingRequests.length}</p>
+            <p className="text-xs text-amber-400 mt-1">{pendingRequests.length > 0 ? "Awaiting review" : "All clear"}</p>
+            <span className="absolute top-4 right-4 text-2xl opacity-20">⏳</span>
+          </Link>
+        </div>
+      )}
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

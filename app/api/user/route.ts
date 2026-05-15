@@ -7,7 +7,7 @@ export async function GET() {
 
   const user = await db.user.findUnique({
     where:  { id: session.user.id },
-    select: { id: true, name: true, email: true, image: true, onboardingComplete: true, createdAt: true, publicSlug: true, accountType: true, buyerProfile: true, plan: true, planExpiresAt: true, role: true },
+    select: { id: true, name: true, email: true, image: true, onboardingComplete: true, createdAt: true, publicSlug: true, accountType: true, buyerProfile: true, plan: true, planExpiresAt: true, role: true, ttsCredits: true },
   });
 
   return Response.json({ user });

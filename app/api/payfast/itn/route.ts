@@ -40,16 +40,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
   }
 
-  const status = data.payment_status;
-  const userId = data.m_payment_id;
-  const gross  = parseFloat(data.amount_gross ?? "0");
+  const status      = data.payment_status;
+  const userId      = data.m_payment_id;
+  const gross       = parseFloat(data.amount_gross ?? "0");
+  const customStr1  = data.custom_str1 ?? "";
 
   if (!userId) {
     console.error("[PayFast ITN] Missing m_payment_id");
     return NextResponse.json({ ok: true });
   }
 
-  if (status === "COMPLETE" && gross >= 165) {
+  // TTS top-up pack
+  if (status === "COMPLETE" && customStr1.startsWith("tts_topup_")) {
+    const packSize = customStr1.replace("tts_topup_", "");
+    const creditsMap: Record<string, number> = { "100": 100, "300": 300, "500": 500 };
+    const credits = creditsMap[packSize];
+    if (credits) {
+      await db.user.update({
+        where: { id: userId },
+        data:  { ttsCredits: { increment: credits } },
+      });
+      console.log(`[PayFast ITN] Added ${credits} TTS credits to user ${userId}`);
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  if (status === "COMPLETE" && gross >= 499) {
     // Grant pro for 31 days — PayFast subscription ITN will fire monthly to renew
     const planExpiresAt = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
     await db.user.update({

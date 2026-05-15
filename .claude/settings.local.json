@@ -21,7 +21,8 @@
       "WebFetch(domain:www.pexels.com)",
       "WebFetch(domain:images.pexels.com)",
       "PowerShell(Get-NetTCPConnection *)",
-      "Bash(Select-String -Pattern \"icon|favicon|apple|manifest|og|opengraph\")"
+      "Bash(Select-String -Pattern \"icon|favicon|apple|manifest|og|opengraph\")",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 5 -ErrorAction Stop; $r.StatusCode } catch { \"not running\" })"
     ]
   }
 }

@@ -24,6 +24,8 @@ interface Listing {
   slug:               string | null;
   avgRating:          number | null;
   reviewCount:        number;
+  hireCount:          number;
+  totalEarned:        number;
   verificationStatus: string;
 }
 
@@ -135,6 +137,11 @@ function TwinCard({ listing }: { listing: Listing }) {
             <div className="mt-1">
               <StarDisplay rating={listing.avgRating} count={listing.reviewCount} />
             </div>
+          )}
+          {listing.hireCount > 0 && (
+            <p className="text-xs text-emerald-500 mt-0.5 font-medium">
+              {listing.hireCount} {listing.hireCount === 1 ? "hire" : "hires"} · R{listing.totalEarned.toLocaleString()} earned
+            </p>
           )}
         </div>
       </div>

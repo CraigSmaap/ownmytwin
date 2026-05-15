@@ -28,6 +28,13 @@ function SettingsContent() {
   const [upgradeError,   setUpgradeError]   = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Voice credits
+  const [ttsCredits,   setTtsCredits]   = useState(0);
+  const [topupPack,    setTopupPack]    = useState("100");
+  const [toppingUp,    setToppingUp]    = useState(false);
+  const [topupError,   setTopupError]   = useState("");
+  const topupParam = searchParams.get("topup");
+
   // Public profile (talent only)
   const [slug,               setSlug]               = useState("");
   const [editingSlug,        setEditingSlug]         = useState("");
@@ -79,6 +86,7 @@ function SettingsContent() {
         setEditingSlug(user.publicSlug ?? "");
         setPlan(user.plan ?? "free");
         setPlanExpiresAt(user.planExpiresAt ?? null);
+        setTtsCredits(user.ttsCredits ?? 0);
         const bp = user.buyerProfile ?? {};
         setBuyerCompany(bp.company ?? "");
         setBuyerIndustry(bp.industry ?? "");
@@ -160,6 +168,36 @@ function SettingsContent() {
     }
   }
 
+  async function handleTopup() {
+    setToppingUp(true);
+    setTopupError("");
+    try {
+      const res  = await fetch("/api/payfast/topup", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ pack: topupPack }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setTopupError(json.error ?? "Could not start checkout"); setToppingUp(false); return; }
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = json.url;
+      Object.entries(json.data as Record<string, string>).forEach(([k, v]) => {
+        const input = document.createElement("input");
+        input.type  = "hidden";
+        input.name  = k;
+        input.value = v;
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch {
+      setTopupError("Network error — please try again");
+      setToppingUp(false);
+    }
+  }
+
   async function handleSaveBuyerProfile() {
     setSavingBuyer(true);
     await fetch("/api/user", {
@@ -229,6 +267,16 @@ function SettingsContent() {
       </div>
 
       {/* Upgrade success / cancelled banner */}
+      {topupParam === "success" && (
+        <div className="bg-emerald-950/40 border border-emerald-700/60 rounded-xl px-4 py-3 text-sm text-emerald-400">
+          Voice credits added to your account!
+        </div>
+      )}
+      {topupParam === "cancelled" && (
+        <div className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400">
+          Top-up was cancelled — no charge was made.
+        </div>
+      )}
       {upgradeParam === "success" && (
         <div className="bg-green-900/30 border border-green-700 text-green-300 rounded-2xl px-5 py-4 text-sm font-medium">
           🎉 Welcome to Pro! Your plan has been activated.
@@ -362,6 +410,56 @@ function SettingsContent() {
           </div>
         )}
       </div>}
+
+      {/* Voice Credits — Pro only */}
+      {!isBuyer && isPro && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Voice Credits</h2>
+              <p className="text-xs text-slate-600 mt-1">Used for TTS voice replies. 10 free/day included with Pro. Credits carry over month to month.</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-white">{ttsCredits}</p>
+              <p className="text-xs text-slate-500">credits remaining</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { pack: "100", credits: 100, price: "R49",  perCredit: "R0.49" },
+              { pack: "300", credits: 300, price: "R129", perCredit: "R0.43" },
+              { pack: "500", credits: 500, price: "R199", perCredit: "R0.40" },
+            ].map(({ pack, credits, price, perCredit }) => (
+              <button
+                key={pack}
+                onClick={() => setTopupPack(pack)}
+                className={`rounded-xl border p-3 text-center transition-all ${
+                  topupPack === pack
+                    ? "bg-indigo-900/50 border-indigo-600 text-white"
+                    : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
+                }`}
+              >
+                <p className="text-lg font-bold text-white">{credits}</p>
+                <p className="text-xs text-indigo-400 font-semibold">{price}</p>
+                <p className="text-xs text-slate-600">{perCredit}/credit</p>
+              </button>
+            ))}
+          </div>
+
+          {topupError && (
+            <p className="text-xs text-red-400 bg-red-950/30 border border-red-800/40 rounded-xl px-3 py-2">{topupError}</p>
+          )}
+          <button
+            onClick={handleTopup}
+            disabled={toppingUp}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+          >
+            {toppingUp ? "Opening checkout..." : `Buy ${topupPack} Credits`}
+          </button>
+          <p className="text-xs text-slate-600 text-center">Paid via PayFast. Credits never expire.</p>
+        </div>
+      )}
 
       {/* Referral */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">

@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.pexels.com",
       },
+      {
+        protocol: "https",
+        hostname: "pub-de24c44157634646b7d7a13bc807da68.r2.dev",
+      },
     ],
   },
 };

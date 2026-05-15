@@ -110,7 +110,7 @@ export default async function RequestsPage() {
   }));
 
   const fmt = (n: number) =>
-    n === 0 ? "$0" : `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    `R${n.toLocaleString("en-ZA", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   return (
     <div className="max-w-4xl space-y-6">

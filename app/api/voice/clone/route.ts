@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { createVoiceClone, elevenLabsEnabled } from "@/lib/elevenlabs";
+import { checkMonthlyLimit } from "@/lib/rate-limit";
 
 export async function POST() {
   const session = await auth();
@@ -16,6 +17,14 @@ export async function POST() {
     return NextResponse.json({ error: "Voice cloning requires a Pro plan" }, { status: 403 });
   }
 
+  const { allowed, remaining, limit } = await checkMonthlyLimit(session.user.id, "voice_clone", user.plan);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `Monthly voice clone limit reached (${limit}/month). Resets next month.` },
+      { status: 429 },
+    );
+  }
+
   const [twin, recordings] = await Promise.all([
     db.twin.findUnique({ where: { userId: session.user.id } }),
     db.voiceRecording.findMany({ where: { userId: session.user.id }, take: 25 }),
@@ -26,12 +35,17 @@ export async function POST() {
 
   const audioUrls = recordings.map((r) => r.url);
 
-  const voiceId = await createVoiceClone(twin.name ?? "My Twin", audioUrls);
+  try {
+    const voiceId = await createVoiceClone(twin.name ?? "My Twin", audioUrls);
 
-  await db.twin.update({
-    where: { id: twin.id },
-    data:  { elevenLabsVoiceId: voiceId },
-  });
+    await db.twin.update({
+      where: { id: twin.id },
+      data:  { elevenLabsVoiceId: voiceId },
+    });
 
-  return NextResponse.json({ voiceId });
+    return NextResponse.json({ voiceId });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Voice clone failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

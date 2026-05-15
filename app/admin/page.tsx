@@ -121,6 +121,9 @@ export default async function AdminPage() {
           <p className="text-slate-400 text-sm mt-1">Platform revenue, growth, and activity</p>
         </div>
         <div className="flex gap-3 flex-wrap">
+          <Link href="/dashboard" className="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors border border-slate-700">
+            ← Dashboard
+          </Link>
           <Link href="/admin/verification" className="bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors border border-slate-700">
             KYC Queue {pendingKyc > 0 && <span className="ml-1.5 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{pendingKyc}</span>}
           </Link>

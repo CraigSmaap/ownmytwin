@@ -36,6 +36,8 @@ model User {
   referralRewardGiven  Boolean  @default(false)
   referralRewardMonths Int      @default(0)
 
+  ttsCredits           Int      @default(0)
+
   twin                Twin?
   photos              LikenessPhoto[]
   voiceRecordings     VoiceRecording[]
