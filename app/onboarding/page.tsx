@@ -10,6 +10,30 @@ import { CameraCapture } from "@/components/camera-capture";
 const TALENT_STEPS = ["Welcome", "Photos", "Voice", "Profile", "Memory", "Ready"];
 const BUYER_STEPS  = ["Your Details", "Ready"];
 
+const COUNTRIES = [
+  "Afghanistan","Albania","Algeria","Andorra","Angola","Antigua & Barbuda","Argentina","Armenia","Australia",
+  "Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin",
+  "Bhutan","Bolivia","Bosnia & Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
+  "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia",
+  "Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica",
+  "Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini",
+  "Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada",
+  "Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia",
+  "Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati",
+  "Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania",
+  "Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania",
+  "Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique",
+  "Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea",
+  "North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay",
+  "Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts & Nevis",
+  "Saint Lucia","Saint Vincent & the Grenadines","Samoa","San Marino","Saudi Arabia","Senegal","Serbia",
+  "Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa",
+  "South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan",
+  "Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad & Tobago","Tunisia","Turkey",
+  "Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States",
+  "Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
+];
+
 const CATEGORIES = [
   { value: "life_event",   label: "Life Event",   icon: "📅" },
   { value: "preference",   label: "Preference",   icon: "❤️" },
@@ -32,6 +56,7 @@ export default function OnboardingPage() {
   // Age + POPIA consent gate (shown first, before account type)
   const [ageGatePassed,  setAgeGatePassed]  = useState(false);
   const [dobValue,       setDobValue]       = useState("");
+  const [countryValue,   setCountryValue]   = useState("");
   const [popiAccepted,   setPopiAccepted]   = useState(false);
   const [ageError,       setAgeError]       = useState("");
   const [savingConsent,  setSavingConsent]  = useState(false);
@@ -39,6 +64,7 @@ export default function OnboardingPage() {
   async function handleAgeGate() {
     setAgeError("");
     if (!dobValue) { setAgeError("Please enter your date of birth."); return; }
+    if (!countryValue) { setAgeError("Please select your country."); return; }
     if (!popiAccepted) { setAgeError("You must accept the POPIA consent to continue."); return; }
     const dob  = new Date(dobValue);
     const today = new Date();
@@ -50,7 +76,7 @@ export default function OnboardingPage() {
     await fetch("/api/user", {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ dateOfBirth: dobValue, popiConsent: true }),
+      body:    JSON.stringify({ dateOfBirth: dobValue, popiConsent: true, country: countryValue }),
     });
     setSavingConsent(false);
     setAgeGatePassed(true);
@@ -237,6 +263,20 @@ export default function OnboardingPage() {
                 <p className="text-xs text-slate-600 mt-1">You must be 18 or older to use this platform.</p>
               </div>
 
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Country</label>
+                <select
+                  value={countryValue}
+                  onChange={(e) => setCountryValue(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 text-sm appearance-none"
+                >
+                  <option value="">Select your country...</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 text-xs text-slate-400 leading-relaxed">
                 <p className="font-semibold text-slate-300 text-sm">POPIA Consent — Protection of Personal Information Act (South Africa)</p>
                 <p>By using OwnMyTwin, you consent to the collection and processing of your personal information, including your name, email address, photos, voice recordings, and identity data, for the purpose of operating your AI Twin and licensing your digital identity to approved parties.</p>
@@ -262,7 +302,7 @@ export default function OnboardingPage() {
 
               <button
                 onClick={handleAgeGate}
-                disabled={savingConsent || !dobValue || !popiAccepted}
+                disabled={savingConsent || !dobValue || !countryValue || !popiAccepted}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors touch-manipulation"
               >
                 {savingConsent ? "Saving…" : "I Agree — Continue →"}

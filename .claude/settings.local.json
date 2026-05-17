@@ -31,7 +31,9 @@
       "Bash(Sort-Object FullName)",
       "Bash(git -C \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" check-ignore .env)",
       "Bash(git -C \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" status --short)",
-      "Bash(xargs grep -l \"likenessPhoto\\\\|photo\\\\|likeness\")"
+      "Bash(xargs grep -l \"likenessPhoto\\\\|photo\\\\|likeness\")",
+      "Bash(npx kill-port *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)"
     ]
   }
 }

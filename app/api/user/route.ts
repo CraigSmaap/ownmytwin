@@ -7,7 +7,7 @@ export async function GET() {
 
   const user = await db.user.findUnique({
     where:  { id: session.user.id },
-    select: { id: true, name: true, email: true, image: true, onboardingComplete: true, createdAt: true, publicSlug: true, accountType: true, buyerProfile: true, plan: true, planExpiresAt: true, role: true, ttsCredits: true },
+    select: { id: true, name: true, email: true, image: true, onboardingComplete: true, createdAt: true, publicSlug: true, accountType: true, buyerProfile: true, plan: true, planExpiresAt: true, role: true, ttsCredits: true, country: true },
   });
 
   return Response.json({ user });
@@ -18,7 +18,7 @@ export async function PATCH(request: Request) {
   if (!session?.user?.id) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, onboardingComplete, publicSlug, accountType, buyerProfile, dateOfBirth, popiConsent } = body;
+  const { name, onboardingComplete, publicSlug, accountType, buyerProfile, dateOfBirth, popiConsent, country } = body;
 
   let cleanSlug: string | undefined;
   if (publicSlug !== undefined) {
@@ -47,6 +47,7 @@ export async function PATCH(request: Request) {
       ...(buyerProfile       !== undefined && { buyerProfile }),
       ...(dateOfBirth        !== undefined && { dateOfBirth: new Date(dateOfBirth) }),
       ...(popiConsent        === true       && { popiConsent: true, popiConsentAt: new Date() }),
+      ...(country            !== undefined && { country: String(country).slice(0, 100) }),
     },
     select: { id: true, name: true, email: true, onboardingComplete: true, publicSlug: true, accountType: true },
   });

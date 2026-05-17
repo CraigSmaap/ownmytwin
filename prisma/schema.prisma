@@ -29,6 +29,7 @@ model User {
   dateOfBirth        DateTime?
   popiConsent        Boolean   @default(false)
   popiConsentAt      DateTime?
+  country            String?
   verificationStatus String    @default("unverified") // "unverified" | "pending" | "verified" | "rejected"
 
   referralCode         String?  @unique
