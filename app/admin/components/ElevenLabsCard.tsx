@@ -12,7 +12,7 @@ export interface ElevenLabsUsage {
 }
 
 export function ElevenLabsCard({ usage }: { usage: ElevenLabsUsage }) {
-  if (usage.error) {
+  if (usage.error || !usage.characterLimit) {
     return (
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">ElevenLabs</h2>

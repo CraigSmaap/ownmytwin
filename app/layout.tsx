@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 const BASE_URL = process.env.NEXTAUTH_URL ?? "https://ownmytwin.com";
 
 const TITLE       = "OwnMyTwin — Own Your Digital Identity";
-const DESCRIPTION = "Create your AI twin, own your voice and likeness, and earn from licensing deals. South Africa's digital identity marketplace for creators.";
+const DESCRIPTION = "Create your AI twin, own your voice and likeness, and earn passively from licensing deals. The digital identity marketplace for creators, talent, and professionals.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -19,13 +19,15 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   keywords: [
     "AI twin", "digital identity", "voice cloning", "likeness licensing",
-    "South Africa creator", "AI avatar", "digital human marketplace",
+    "AI avatar", "digital human marketplace", "license your likeness",
+    "creator monetization", "AI presenter", "voice artist marketplace",
+    "own your likeness", "digital twin platform",
   ],
   authors: [{ name: "OwnMyTwin" }],
   creator: "OwnMyTwin",
   openGraph: {
     type:        "website",
-    locale:      "en_ZA",
+    locale:      "en_US",
     url:         BASE_URL,
     siteName:    "OwnMyTwin",
     title:       TITLE,

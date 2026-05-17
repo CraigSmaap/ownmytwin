@@ -116,21 +116,22 @@ export default async function AdminPage() {
       next: { revalidate: 300 },
     });
     const elData = await elRes.json() as {
-      character_count: number; character_limit: number;
-      voice_limit: number; voices_used: { voice_id: string }[];
-      tier: string; next_character_count_reset_unix: number;
+      character_count?: number; character_limit?: number;
+      voice_limit?: number; voices_used?: { voice_id: string }[];
+      tier?: string; next_character_count_reset_unix?: number;
     };
+    console.log("[ElevenLabs subscription]", JSON.stringify(elData));
     const now2        = new Date();
-    const resetDate   = new Date(elData.next_character_count_reset_unix * 1000);
+    const resetDate   = new Date((elData.next_character_count_reset_unix ?? 0) * 1000);
     const daysInMonth = Math.round((resetDate.getTime() - new Date(resetDate.getFullYear(), resetDate.getMonth() - 1, resetDate.getDate()).getTime()) / (24 * 60 * 60 * 1000));
     const daysToReset = Math.ceil((resetDate.getTime() - now2.getTime()) / (24 * 60 * 60 * 1000));
     const daysIntoMonth = Math.max(1, daysInMonth - daysToReset);
     elevenLabsUsage = {
-      characterCount:  elData.character_count,
-      characterLimit:  elData.character_limit,
-      voiceLimit:      elData.voice_limit,
+      characterCount:  elData.character_count  ?? 0,
+      characterLimit:  elData.character_limit  ?? 0,
+      voiceLimit:      elData.voice_limit       ?? 0,
       voicesUsed:      elData.voices_used?.length ?? 0,
-      tier:            elData.tier,
+      tier:            elData.tier              ?? "unknown",
       daysIntoMonth,
       daysInMonth,
     };

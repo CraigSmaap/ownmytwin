@@ -176,8 +176,23 @@ export default async function PublicProfilePage(
   const initials = (twin.name ?? "T")
     .split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
+  const jsonLd = {
+    "@context":   "https://schema.org",
+    "@type":      "Person",
+    name:         twin.name ?? undefined,
+    description:  twin.bio ?? undefined,
+    image:        photoUrl ?? undefined,
+    url:          profileUrl,
+    jobTitle:     personality?.profession ?? undefined,
+    address:      personality?.location ? { "@type": "Place", name: personality.location } : undefined,
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Top nav */}
       <nav className="fixed top-0 inset-x-0 z-10 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60">

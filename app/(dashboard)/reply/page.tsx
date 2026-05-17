@@ -215,7 +215,7 @@ export default function ReplyPage() {
           {/* Platform picker */}
           <div>
             <p className="text-xs text-slate-500 mb-2">Platform</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {PLATFORMS.map((p) => (
                 <button
                   key={p.value}

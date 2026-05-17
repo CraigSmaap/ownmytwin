@@ -582,7 +582,7 @@ export default function TwinPage() {
 
               {photos.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {photos.map((p) => (
                       <div key={p.id} className="relative group aspect-square rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
                         <Image src={p.url} alt={p.label ?? "Likeness photo"} fill className="object-cover" />
