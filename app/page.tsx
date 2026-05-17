@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 /* ─── Data ──────────────────────────────────────────────────────── */
 
 const STATS = [
-  { value: "R0",    label: "What you earn when brands use your AI likeness without your permission" },
+  { value: "$0",    label: "What you earn when brands use your AI likeness without your permission" },
   { value: "80%",   label: "of every licensing deal goes directly to you — your money, your rules" },
   { value: "24/7",  label: "your Twin replies to DMs, handles enquiries, and earns while you sleep" },
   { value: "3 min", label: "to build your AI Twin and go live on the marketplace" },
@@ -81,7 +81,7 @@ const PROOF_POINTS = [
 const PRICING = [
   {
     name: "Free",
-    price: "R0",
+    price: "$0",
     period: "forever",
     description: "Build your digital identity and start getting discovered.",
     features: [
@@ -106,7 +106,7 @@ const PRICING = [
   },
   {
     name: "Pro",
-    price: "R499",
+    price: "$29",
     period: "per month",
     description: "Unlock earning, creation, and your full digital self.",
     badge: "Most Popular",

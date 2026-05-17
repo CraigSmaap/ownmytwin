@@ -145,23 +145,10 @@ function SettingsContent() {
     setUpgrading(true);
     setUpgradeError("");
     try {
-      const res  = await fetch("/api/payfast/checkout", { method: "POST" });
+      const res  = await fetch("/api/paystack/checkout", { method: "POST" });
       const json = await res.json();
       if (!res.ok) { setUpgradeError(json.error ?? "Could not start checkout"); setUpgrading(false); return; }
-
-      // Build and auto-submit a hidden form to PayFast
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = json.url;
-      Object.entries(json.data as Record<string, string>).forEach(([k, v]) => {
-        const input    = document.createElement("input");
-        input.type     = "hidden";
-        input.name     = k;
-        input.value    = v;
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
+      window.location.href = json.authorization_url;
     } catch {
       setUpgradeError("Network error — please try again");
       setUpgrading(false);
@@ -172,26 +159,14 @@ function SettingsContent() {
     setToppingUp(true);
     setTopupError("");
     try {
-      const res  = await fetch("/api/payfast/topup", {
+      const res  = await fetch("/api/paystack/topup", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ pack: topupPack }),
       });
       const json = await res.json();
       if (!res.ok) { setTopupError(json.error ?? "Could not start checkout"); setToppingUp(false); return; }
-
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = json.url;
-      Object.entries(json.data as Record<string, string>).forEach(([k, v]) => {
-        const input = document.createElement("input");
-        input.type  = "hidden";
-        input.name  = k;
-        input.value = v;
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
+      window.location.href = json.authorization_url;
     } catch {
       setTopupError("Network error — please try again");
       setToppingUp(false);
@@ -359,7 +334,7 @@ function SettingsContent() {
 
         {isPro ? (
           <div className="space-y-3">
-            <p className="text-white font-semibold">OwnMyTwin Pro — R499/month</p>
+            <p className="text-white font-semibold">OwnMyTwin Pro — $29/month</p>
             {planExpiresAt && (
               <p className="text-xs text-slate-400">
                 Renews on {new Date(planExpiresAt).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" })}
@@ -376,7 +351,7 @@ function SettingsContent() {
         ) : (
           <div className="space-y-4">
             <div>
-              <p className="text-white font-semibold mb-1">Upgrade to Pro — R499/month</p>
+              <p className="text-white font-semibold mb-1">Upgrade to Pro — $29/month</p>
               <p className="text-sm text-slate-400">Unlock everything OwnMyTwin has to offer.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -404,9 +379,9 @@ function SettingsContent() {
               disabled={upgrading}
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
             >
-              {upgrading ? "Opening checkout..." : "Upgrade to Pro — R499/month"}
+              {upgrading ? "Opening checkout..." : "Upgrade to Pro — $29/month"}
             </button>
-            <p className="text-xs text-slate-600 text-center">Cancel anytime via PayFast. South African payments supported.</p>
+            <p className="text-xs text-slate-600 text-center">Cancel anytime. Secure payments via Paystack.</p>
           </div>
         )}
       </div>}
@@ -427,9 +402,9 @@ function SettingsContent() {
 
           <div className="grid grid-cols-3 gap-2">
             {[
-              { pack: "100", credits: 100, price: "R49",  perCredit: "R0.49" },
-              { pack: "300", credits: 300, price: "R129", perCredit: "R0.43" },
-              { pack: "500", credits: 500, price: "R199", perCredit: "R0.40" },
+              { pack: "100", credits: 100, price: "$3",  perCredit: "$0.03" },
+              { pack: "300", credits: 300, price: "$7",  perCredit: "$0.02" },
+              { pack: "500", credits: 500, price: "$11", perCredit: "$0.02" },
             ].map(({ pack, credits, price, perCredit }) => (
               <button
                 key={pack}
@@ -457,7 +432,7 @@ function SettingsContent() {
           >
             {toppingUp ? "Opening checkout..." : `Buy ${topupPack} Credits`}
           </button>
-          <p className="text-xs text-slate-600 text-center">Paid via PayFast. Credits never expire.</p>
+          <p className="text-xs text-slate-600 text-center">Paid via Paystack. Credits never expire.</p>
         </div>
       )}
 

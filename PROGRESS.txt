@@ -7,116 +7,117 @@ COMPLETED
 ---------
 
 CORE FEATURES (MVP)
-  [x] Auth — NextAuth v5, email/password, Google OAuth, email verification
-  [x] Onboarding — name, profession, location, tone, values, first memory
-  [x] Twin config — personality, writing style, tone, values, humor, signature phrases, avoids
-  [x] Memories — add/edit/delete, categories, search/filter, visibility, importance levels
-  [x] Reply For Me — 3 styles (Natural/Brief/Warm) + tweak buttons (shorter/warmer/professional)
-  [x] Talk to Twin — full chat UI with 60% completeness lock, save-as-memory button
-  [x] AI Readiness Score — tiered scoring across photos/voice/personality/memories/licensing/verified
-  [x] Likeness photos — upload + camera capture, stored in R2
-  [x] Voice recording — 8-script guided recorder, stored in R2
-  [x] Voice cloning — ElevenLabs integration built (BLOCKED: requires paid ElevenLabs plan to activate)
-  [x] TTS voice playback — on Reply For Me page, rate limited
-  [x] Dashboard — greeting, completeness bar, stats, setup checklist, recent activity
-  [x] Public profile — /p/[slug] shareable page, no auth required
-  [x] Settings — name edit, data export, account delete, public profile, referrals
-  [x] POPIA consent — South African privacy law compliance banner
+  ✅ Auth — NextAuth v5, email/password, Google OAuth, email verification
+  ✅ Onboarding — name, profession, location, tone, values, first memory
+  ✅ Twin config — personality, writing style, tone, values, humor, signature phrases, avoids
+  ✅ Memories — add/edit/delete, categories, search/filter, visibility, importance levels
+  ✅ Reply For Me — 3 styles (Natural/Brief/Warm) + tweak buttons (shorter/warmer/professional)
+  ✅ Talk to Twin — full chat UI with 60% completeness lock, save-as-memory button
+  ✅ AI Readiness Score — tiered scoring across photos/voice/personality/memories/licensing/verified
+  ✅ Likeness photos — upload + camera capture, stored in R2
+  ✅ Voice recording — 8-script guided recorder, stored in R2
+  ✅ Voice cloning — ElevenLabs integration built (BLOCKED: requires paid ElevenLabs plan to activate)
+  ✅ TTS voice playback — on Reply For Me page, rate limited
+  ✅ Dashboard — greeting, completeness bar, stats, setup checklist, recent activity
+  ✅ Public profile — /p/[slug] shareable page, no auth required
+  ✅ Settings — name edit, data export, account delete, public profile, referrals
+  ✅ POPIA consent — South African privacy law compliance banner
 
 MARKETPLACE & LICENSING
-  [x] Licensing permissions page — 17 license categories, price/approval/territory per category
-  [x] Marketplace browse page — filters by usage type, location, price, verified status
-  [x] Marketplace twin cards — hire count + total earned displayed in green
-  [x] License request system — buyers submit requests, stored in DB
-  [x] Job requests page (talent) — full earnings breakdown by license type, 6-month bar chart
-  [x] Earnings on dashboard — Total Earned / This Month / Pending Requests cards (link to full breakdown)
-  [x] Currency — R (ZAR) throughout, no $ signs
-  [x] Payment — PayFast checkout for license requests
-  [x] Revenue split — 80/20 Pro, 70/30 Free
+  ✅ Licensing permissions page — 17 license categories, price/approval/territory per category
+  ✅ Marketplace browse page — filters by usage type, location, price, verified status
+  ✅ Marketplace twin cards — hire count + total earned displayed in green
+  ✅ License request system — buyers submit requests, stored in DB
+  ✅ Job requests page (talent) — full earnings breakdown by license type, 6-month bar chart
+  ✅ Earnings on dashboard — Total Earned / This Month / Pending Requests cards (link to full breakdown)
+  ✅ Currency — R (ZAR) throughout, no $ signs
+  ✅ Payment — PayFast checkout for license requests
+  ✅ Revenue split — 80/20 Pro, 70/30 Free
 
 MONETISATION
-  [x] Pro plan — R499/month via PayFast subscription (price consistent across all UI and API)
-  [x] TTS rate limits — Free: 0/day, Pro: 10/day
-  [x] Voice clone limits — Free: 0/month, Pro: 3/month
-  [x] TTS credit top-up packs — R49 (100 credits), R129 (300), R199 (500) — credits never expire
-  [x] Top-up UI in Settings — pack selector, balance display, PayFast checkout
-  [x] Credits drain before daily limit — purchased credits take priority over daily allowance
+  ✅ Pro plan — $29/month via PayFast subscription (price consistent across all UI and API)
+  ✅ TTS rate limits — Free: 0/day, Pro: 10/day
+  ✅ Voice clone limits — Free: 0/month, Pro: 3/month
+  ✅ TTS credit top-up packs — R49 (100 credits), R129 (300), R199 (500) — credits never expire
+  ✅ Top-up UI in Settings — pack selector, balance display, PayFast checkout
+  ✅ Credits drain before daily limit — purchased credits take priority over daily allowance
 
 BUYER EXPERIENCE
-  [x] Buyer account type — separate onboarding, dashboard, nav
-  [x] My Requests page (buyer) — track pending/approved/rejected requests
-  [x] Pay Now flow — buyer pays for approved request via PayFast
+  ✅ Buyer account type — separate onboarding, dashboard, nav
+  ✅ My Requests page (buyer) — track pending/approved/rejected requests
+  ✅ Pay Now flow — buyer pays for approved request via PayFast
 
-EMAIL NOTIFICATIONS (fully built and wired)
-  [x] Buyer submits request → buyer confirmation + talent notification + admin alert
-  [x] Admin approves/rejects → buyer status email + talent decision email
-  [x] Buyer pays → buyer payment confirmation email
-  [x] Verification email on signup
-  [x] Password reset email
+EMAIL NOTIFICATIONS
+  ✅ Buyer submits request → buyer confirmation + talent notification + admin alert
+  ✅ Admin approves/rejects → buyer status email + talent decision email
+  ✅ Buyer pays → buyer payment confirmation email
+  ✅ Verification email on signup
+  ✅ Password reset email
   NOTE: Set APP_URL and NEXTAUTH_URL to https://ownmytwin.com in production env before launch
 
 ADMIN
-  [x] User management — list, view, basic management
-  [x] Request management — view all requests, approve/reject, set agreed price
-  [x] Verification management — review identity verification submissions
-  [x] Security page
-  [x] Admin alert email on every new license request
+  ✅ User management — list, view, basic management
+  ✅ Request management — view all requests, approve/reject, set agreed price
+  ✅ Verification management — review identity verification submissions
+  ✅ Security page
+  ✅ Admin alert email on every new license request
 
 OTHER
-  [x] Developer API — API keys, public chat endpoint /api/v1/twins/[id]/chat
-  [x] Referral system — earn 1 free month per paying referral, capped at 6 months
-  [x] Reel Creator — AI-generated content ideas
-  [x] Showcase — public feed of completed projects
-  [x] Verify Identity — submit for verified badge
-  [x] Rate limiting — per-user daily/monthly limits across all AI actions
-  [x] Prompt caching — Anthropic system prompt caching for cost savings
-  [x] PayFast live mode — PAYFAST_SANDBOX=false, live merchant credentials set
+  ✅ Developer API — API keys, public chat endpoint /api/v1/twins/[id]/chat
+  ✅ Referral system — earn 1 free month per paying referral, capped at 6 months
+  ✅ Reel Creator — AI-generated content ideas
+  ✅ Showcase — public feed of completed projects
+  ✅ Verify Identity — submit for verified badge
+  ✅ Rate limiting — per-user daily/monthly limits across all AI actions
+  ✅ Prompt caching — Anthropic system prompt caching for cost savings
+  ✅ PayFast live mode — PAYFAST_SANDBOX=false, live merchant credentials set
 
 
 REMAINING — PRE-LAUNCH BLOCKERS
 --------------------------------
 
-  [ ] ElevenLabs paid plan — MUST upgrade to Starter ($5/mo) or higher before launch.
-        Voice cloning and TTS will fail for all users without it.
-        API key is set in .env.local; the account subscription tier is the issue.
-        Go to elevenlabs.io/pricing → upgrade → voice features will work immediately.
+  ✅  Neon — production Postgres database set up.
 
-  [ ] Set production URLs in deployment environment:
+  ✅  Cloudflare — set up (deployment/DNS/proxy).
+
+  ✅  ElevenLabs — upgraded to Starter plan, voice cloning and TTS active.
+
+  ⚠️  Set production URLs in deployment environment:
         APP_URL="https://ownmytwin.com"
         NEXTAUTH_URL="https://ownmytwin.com"
         (Currently set to localhost — email links will be broken in production)
 
-  [ ] End-to-end payment test in live mode:
-        Flow: submit request → admin approves + sets price → buyer pays → ITN fires → paidAt updated → confirmation email sent
-        Test with a small real amount before opening to public.
+  ⚠️  End-to-end payment test — do this live on domain after deployment.
+        Deploy to production, set real URLs, run one real transaction (even R1 agreed price).
+        Verify: ITN webhook fires → paidAt updated → confirmation email received.
 
 
 REMAINING — IMPORTANT BUT NOT BLOCKING
 ----------------------------------------
 
-  [ ] Reviews display
+  ⬜  Reviews display
         Review model and data exists in DB. Not yet shown on marketplace cards or public profiles.
 
-  [ ] Admin verification approval flow
+  ⬜  Admin verification approval flow
         Users can submit for verified badge; admin review page exists but needs end-to-end testing.
 
-  [ ] Correct Twin Response button
+  ⬜  Correct Twin Response button
         In Talk to Twin chat: let user flag a reply and save the corrected version as a memory.
 
-  [ ] Pro plan price in older UI copy
-        Double-check all marketing copy and UI labels show R499/month consistently.
+  ⬜  Pro plan price in older UI copy
+        Double-check all marketing copy and UI labels show $29/month consistently.
 
 
 FUTURE / POST-LAUNCH
 --------------------
 
-  [ ] SEO meta tags on /p/[slug] — OG image, title, description for social sharing
-  [ ] In-app notifications bell — request received, approved, paid
-  [ ] Twin analytics — profile views, chat requests, hire conversion rate for talent
-  [ ] Onboarding email drip — Day 1 / Day 3 nudge emails to complete twin setup
-  [ ] Twin chat preview for buyers — 3 free messages before committing to license
-  [ ] Mobile app — React Native using existing API
-  [ ] Full avatar / AI video generation
-  [ ] Embeddings / vector search for memories (replace prompt injection)
-  [ ] Global rights management and royalty automation
-  [ ] Studio and brand API portal
+  ⬜  SEO meta tags on /p/[slug] — OG image, title, description for social sharing
+  ⬜  In-app notifications bell — request received, approved, paid
+  ⬜  Twin analytics — profile views, chat requests, hire conversion rate for talent
+  ⬜  Onboarding email drip — Day 1 / Day 3 nudge emails to complete twin setup
+  ⬜  Twin chat preview for buyers — 3 free messages before committing to license
+  ⬜  Mobile app — React Native using existing API
+  ⬜  Full avatar / AI video generation
+  ⬜  Embeddings / vector search for memories (replace prompt injection)
+  ⬜  Global rights management and royalty automation
+  ⬜  Studio and brand API portal

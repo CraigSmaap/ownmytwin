@@ -22,7 +22,10 @@
       "WebFetch(domain:images.pexels.com)",
       "PowerShell(Get-NetTCPConnection *)",
       "Bash(Select-String -Pattern \"icon|favicon|apple|manifest|og|opengraph\")",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 5 -ErrorAction Stop; $r.StatusCode } catch { \"not running\" })"
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 5 -ErrorAction Stop; $r.StatusCode } catch { \"not running\" })",
+      "PowerShell(Test-Path *)",
+      "Bash(npm install *)",
+      "Bash(node generate-pitch-pdf.mjs)"
     ]
   }
 }

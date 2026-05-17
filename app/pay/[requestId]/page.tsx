@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { buildPayfastParams, PAYFAST_URL } from "@/lib/payfast";
+import { initializeTransaction, generateReference } from "@/lib/paystack";
 import { redirect } from "next/navigation";
 
 export default async function PayPage({
@@ -34,28 +34,19 @@ export default async function PayPage({
     redirect("/my-requests");
   }
 
-  const pfParams = buildPayfastParams({
-    requestId:  request.id,
-    amount:     request.agreedPrice,
-    itemName:   `${request.twin.name ?? "Twin"} – ${request.usageType}`,
-    buyerEmail: user!.email,
-    buyerName:  user!.name ?? request.buyerName,
+  const data = await initializeTransaction({
+    email:    user!.email,
+    amount:   Math.round(request.agreedPrice * 100), // convert to cents
+    reference: generateReference("lic"),
+    currency: "USD",
+    callback_url: `${process.env.APP_URL ?? "http://localhost:3000"}/my-requests?paid=true`,
+    metadata: {
+      userId:    session.user.id,
+      type:      "license_payment",
+      requestId: request.id,
+      cancel_action: "hide",
+    },
   });
 
-  return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
-      <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
-      <p className="text-slate-400 text-sm">Redirecting to payment…</p>
-      <form id="pf-form" method="POST" action={PAYFAST_URL} className="hidden">
-        {Object.entries(pfParams).map(([key, value]) => (
-          <input key={key} type="hidden" name={key} value={value} />
-        ))}
-      </form>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: "document.getElementById('pf-form').submit();",
-        }}
-      />
-    </div>
-  );
+  redirect(data.authorization_url);
 }

@@ -350,7 +350,7 @@ export default async function AdminPage() {
             <div className="space-y-1.5 text-xs text-slate-500 mt-3">
               <div className="flex justify-between"><span>Database</span><span className="text-green-400">✓ Online</span></div>
               <div className="flex justify-between"><span>AI (Anthropic)</span><span className="text-green-400">✓ Online</span></div>
-              <div className="flex justify-between"><span>Payments (PayFast)</span><span className="text-green-400">✓ Online</span></div>
+              <div className="flex justify-between"><span>Payments (Paystack)</span><span className="text-green-400">✓ Online</span></div>
               <div className="flex justify-between"><span>Auth</span><span className="text-green-400">✓ Online</span></div>
             </div>
           </div>
