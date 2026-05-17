@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { GrowthChart, type DailySignup } from "./components/GrowthChart";
+import { ElevenLabsCard, type ElevenLabsUsage } from "./components/ElevenLabsCard";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -81,6 +83,65 @@ export default async function AdminPage() {
     }),
   ]);
 
+  // Daily signups — last 30 days
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const recentSignups = await db.user.findMany({
+    where:  { createdAt: { gte: thirtyDaysAgo } },
+    select: { createdAt: true, plan: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const signupMap: Record<string, { free: number; pro: number }> = {};
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const key = d.toISOString().split("T")[0];
+    signupMap[key] = { free: 0, pro: 0 };
+  }
+  for (const u of recentSignups) {
+    const key = u.createdAt.toISOString().split("T")[0];
+    if (signupMap[key]) {
+      if (u.plan === "pro") signupMap[key].pro++;
+      else signupMap[key].free++;
+    }
+  }
+  const growthData: DailySignup[] = Object.entries(signupMap).map(([date, v]) => ({
+    date, free: v.free, pro: v.pro, total: v.free + v.pro,
+  }));
+
+  // ElevenLabs usage
+  let elevenLabsUsage: ElevenLabsUsage;
+  try {
+    const elRes = await fetch("https://api.elevenlabs.io/v1/user/subscription", {
+      headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY ?? "" },
+      next: { revalidate: 300 },
+    });
+    const elData = await elRes.json() as {
+      character_count: number; character_limit: number;
+      voice_limit: number; voices_used: { voice_id: string }[];
+      tier: string; next_character_count_reset_unix: number;
+    };
+    const now2        = new Date();
+    const resetDate   = new Date(elData.next_character_count_reset_unix * 1000);
+    const daysInMonth = Math.round((resetDate.getTime() - new Date(resetDate.getFullYear(), resetDate.getMonth() - 1, resetDate.getDate()).getTime()) / (24 * 60 * 60 * 1000));
+    const daysToReset = Math.ceil((resetDate.getTime() - now2.getTime()) / (24 * 60 * 60 * 1000));
+    const daysIntoMonth = Math.max(1, daysInMonth - daysToReset);
+    elevenLabsUsage = {
+      characterCount:  elData.character_count,
+      characterLimit:  elData.character_limit,
+      voiceLimit:      elData.voice_limit,
+      voicesUsed:      elData.voices_used?.length ?? 0,
+      tier:            elData.tier,
+      daysIntoMonth,
+      daysInMonth,
+    };
+  } catch {
+    elevenLabsUsage = {
+      characterCount: 0, characterLimit: 0, voiceLimit: 0,
+      voicesUsed: 0, tier: "unknown", daysIntoMonth: 1, daysInMonth: 30,
+      error: "Could not fetch ElevenLabs usage — check ELEVENLABS_API_KEY",
+    };
+  }
+
   // Revenue calculations
   const estimatedMRR    = proUsers * 9;
   const growthPct       = signupsLastMonth > 0
@@ -134,6 +195,25 @@ export default async function AdminPage() {
             Users →
           </Link>
         </div>
+      </div>
+
+      {/* Growth chart + ElevenLabs */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">User Growth</h2>
+              <p className="text-xs text-slate-600 mt-0.5">Daily signups — last 30 days</p>
+            </div>
+            <div className="flex gap-3 text-xs text-slate-500">
+              <span>Total: <strong className="text-white">{growthData.reduce((s, d) => s + d.total, 0)}</strong></span>
+              <span>Pro: <strong className="text-purple-400">{growthData.reduce((s, d) => s + d.pro, 0)}</strong></span>
+              <span>Free: <strong className="text-indigo-400">{growthData.reduce((s, d) => s + d.free, 0)}</strong></span>
+            </div>
+          </div>
+          <GrowthChart data={growthData} />
+        </div>
+        <ElevenLabsCard usage={elevenLabsUsage} />
       </div>
 
       {/* Revenue row */}
