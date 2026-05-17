@@ -26,6 +26,10 @@ export async function POST(req: Request) {
   if (!samples?.length) {
     return NextResponse.json({ error: "No samples provided" }, { status: 400 });
   }
+  if (samples.length > 20) {
+    return NextResponse.json({ error: "Maximum 20 samples allowed" }, { status: 400 });
+  }
+  const truncated = samples.map((s) => String(s).slice(0, 2000));
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
@@ -46,7 +50,7 @@ Return ONLY a JSON object with these fields:
 }
 
 Writing samples:
-${samples.map((s, i) => `[${i + 1}] ${s}`).join("\n\n")}`,
+${truncated.map((s, i) => `[${i + 1}] ${s}`).join("\n\n")}`,
       },
     ],
   });

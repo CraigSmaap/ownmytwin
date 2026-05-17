@@ -44,6 +44,10 @@ async function getProfile(slug: string) {
     where: { publicSlug: slug },
     select: {
       verificationStatus: true,
+      publicSlug: true,
+      socialLinks: {
+        select: { platform: true, handle: true },
+      },
       photos: {
         orderBy: { createdAt: "asc" },
         take:    1,
@@ -148,8 +152,26 @@ export default async function PublicProfilePage(
     .filter(([, v]) => v.enabled)
     .map(([k, v]) => ({ id: k, price: v.price, approval: v.approval, territory: v.territory }));
 
-  const toneTags  = (personality?.tone  ?? []).slice(0, 6);
-  const valueTags = (personality?.values ?? []).slice(0, 6);
+  const toneTags    = (personality?.tone  ?? []).slice(0, 6);
+  const valueTags   = (personality?.values ?? []).slice(0, 6);
+  const socialLinks = user.socialLinks ?? [];
+  const profileUrl  = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://ownmytwin.com"}/p/${slug}`;
+
+  const SOCIAL_META: Record<string, { label: string; url: (h: string) => string; bg: string; fg: string; icon: string }> = {
+    facebook: { label: "Facebook", url: (h) => `https://${h.replace(/^https?:\/\//, "")}`, bg: "#1877f2", fg: "#fff", icon: "f" },
+    twitter:  { label: "X",        url: (h) => `https://x.com/${h.replace(/^@/, "")}`,    bg: "#000",    fg: "#fff", icon: "𝕏" },
+    tiktok:   { label: "TikTok",   url: (h) => `https://tiktok.com/@${h.replace(/^@/, "")}`, bg: "#010101", fg: "#fff", icon: "♪" },
+    linkedin: { label: "LinkedIn", url: (h) => `https://${h.replace(/^https?:\/\//, "")}`, bg: "#0077b5", fg: "#fff", icon: "in" },
+  };
+
+  const encodedUrl   = encodeURIComponent(profileUrl);
+  const encodedTitle = encodeURIComponent(`Check out ${twin.name ?? "this AI twin"} on OwnMyTwin`);
+  const shareLinks = [
+    { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, bg: "#1877f2", icon: "f" },
+    { label: "X",        href: `https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`, bg: "#000", icon: "𝕏" },
+    { label: "TikTok",   href: `https://www.tiktok.com/share?url=${encodedUrl}`, bg: "#010101", icon: "♪" },
+    { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, bg: "#0077b5", icon: "in" },
+  ];
 
   const initials = (twin.name ?? "T")
     .split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -272,6 +294,47 @@ export default async function PublicProfilePage(
               ))}
             </div>
           )}
+          {/* Social links — follow buttons */}
+          {socialLinks.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-6">
+              {socialLinks.map(({ platform, handle }) => {
+                const meta = SOCIAL_META[platform];
+                if (!meta) return null;
+                return (
+                  <a
+                    key={platform}
+                    href={meta.url(handle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-opacity hover:opacity-80"
+                    style={{ background: meta.bg, color: meta.fg }}
+                  >
+                    <span>{meta.icon}</span>
+                    <span>{meta.label}</span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Share buttons */}
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            <span className="text-xs text-slate-600 self-center">Share:</span>
+            {shareLinks.map(({ label, href, bg, icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-opacity hover:opacity-80"
+                style={{ background: bg }}
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </a>
+            ))}
+          </div>
+
         </div>
       </div>
 

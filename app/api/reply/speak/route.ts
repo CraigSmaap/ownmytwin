@@ -14,6 +14,10 @@ export async function POST(req: Request) {
     select: { plan: true, ttsCredits: true },
   });
 
+  const { text } = await req.json() as { text: string };
+  if (!text?.trim()) return Response.json({ error: "Text required" }, { status: 400 });
+  if (text.length > 500) return Response.json({ error: "Text must be under 500 characters" }, { status: 400 });
+
   // Use purchased credits first, then fall back to daily limit
   if ((user?.ttsCredits ?? 0) > 0) {
     await db.user.update({
@@ -29,9 +33,6 @@ export async function POST(req: Request) {
       );
     }
   }
-
-  const { text } = await req.json() as { text: string };
-  if (!text?.trim()) return Response.json({ error: "Text required" }, { status: 400 });
 
   const twin = await db.twin.findUnique({ where: { userId: session.user.id } });
   if (!twin?.elevenLabsVoiceId) {

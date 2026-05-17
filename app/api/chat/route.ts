@@ -16,6 +16,10 @@ export async function POST(req: Request) {
   if (!messages?.length) {
     return NextResponse.json({ error: "Messages required" }, { status: 400 });
   }
+  const safeMessages = messages.slice(-20).map((m) => ({
+    role: m.role,
+    content: String(m.content).slice(0, 4000),
+  }));
 
   const [twin, currentUser] = await Promise.all([
     db.twin.findUnique({ where: { userId: session.user.id } }),
@@ -34,7 +38,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const lastUserMsg = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const lastUserMsg = [...safeMessages].reverse().find((m) => m.role === "user")?.content ?? "";
   const memories    = await getRelevantMemories(twin.id, lastUserMsg, 10);
   const memoryContext =
     memories.length > 0
@@ -50,7 +54,7 @@ export async function POST(req: Request) {
     model: modelForPlan(currentUser?.plan),
     max_tokens: 1024,
     system: cachedSystem(systemPrompt),
-    messages,
+    messages: safeMessages,
   });
 
   const reply = response.content[0].type === "text" ? response.content[0].text : "";

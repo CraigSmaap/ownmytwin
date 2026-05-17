@@ -108,6 +108,9 @@ export async function POST(req: NextRequest) {
   let mediaUrl: string | null = null;
 
   if (mediaType === "image" && image) {
+    if (image.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Image must be under 10 MB" }, { status: 400 });
+    }
     const ext    = image.type.includes("png") ? "png" : image.type.includes("webp") ? "webp" : "jpg";
     const ts     = Date.now();
     const key    = `showcase/${session.user.id}-${ts}.${ext}`;

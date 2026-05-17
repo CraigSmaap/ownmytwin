@@ -25,7 +25,13 @@
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 5 -ErrorAction Stop; $r.StatusCode } catch { \"not running\" })",
       "PowerShell(Test-Path *)",
       "Bash(npm install *)",
-      "Bash(node generate-pitch-pdf.mjs)"
+      "Bash(node generate-pitch-pdf.mjs)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\\\\app\\\\api\" -Recurse -Filter \"route.ts\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(git -C \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" check-ignore .env)",
+      "Bash(git -C \"C:\\\\Users\\\\craig\\\\Desktop\\\\Software dev\\\\Ownmytwin\" status --short)",
+      "Bash(xargs grep -l \"likenessPhoto\\\\|photo\\\\|likeness\")"
     ]
   }
 }

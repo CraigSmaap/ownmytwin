@@ -34,7 +34,9 @@ export async function PATCH(
       status,
       respondedAt:  new Date(),
       responseNote: responseNote?.trim() || null,
-      ...(status === "approved" && agreedPrice != null ? { agreedPrice } : {}),
+      ...(status === "approved" && agreedPrice != null ? {
+        agreedPrice: typeof agreedPrice === "number" && agreedPrice > 0 ? agreedPrice : undefined,
+      } : {}),
     },
   });
 

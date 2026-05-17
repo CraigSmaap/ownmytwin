@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
   const duration = form.get("duration") as string | null;
 
   if (!audio) return NextResponse.json({ error: "No audio" }, { status: 400 });
+  if (audio.size > 50 * 1024 * 1024) {
+    return NextResponse.json({ error: "Audio must be under 50 MB" }, { status: 400 });
+  }
 
   const ext    = audio.type.includes("mp4") ? "mp4" : "webm";
   const key    = `voice/${session.user.id}-${Date.now()}.${ext}`;

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { SocialLinksEditor } from "./SocialLinksEditor";
 
 function SettingsContent() {
   const router       = useRouter();
@@ -676,6 +677,17 @@ function SettingsContent() {
           )}
         </button>
       </div>
+
+      {/* Social Links */}
+      {!isBuyer && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Social Links</h2>
+            <p className="text-xs text-slate-600 mt-1">Your handles appear on your public profile so visitors can follow you.</p>
+          </div>
+          <SocialLinksEditor />
+        </div>
+      )}
 
       {/* Danger Zone */}
       <div className="bg-slate-900 border border-red-900/40 rounded-2xl p-6 space-y-4">
