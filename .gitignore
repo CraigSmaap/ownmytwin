@@ -7,3 +7,4 @@ build
 .expo
 .vscode
 coverage
+.vercel
